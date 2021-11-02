@@ -2,9 +2,11 @@
 
 So, as long as you have node.js installed. Things should be okay enough. 
 
-Open a command prompt to the folder and run: npm start
+Open a command prompt to the folder and run: 
+- npm install
+- npm start
 <br>This should automatically set everything up. I think it should install local tunnel, if not
-just run this: npm install -g localtunnel
+just run this: npm install
 
 So, once everything is running, you'll need two command promt windows open. If you have windows, look up windows terminal. 
 <br>In one window, you can run: npm start
