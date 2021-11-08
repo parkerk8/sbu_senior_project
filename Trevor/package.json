@@ -3,14 +3,26 @@
 	"version": "0.1.0",
 	"dependencies": {
 		"express": "^4.14.0",
+		"dotenv": "^5.0.1",
 		"body-parser": "^1.15.2",
-		"cookie-parser": "^1.4.3"
+		"cross-port-killer": "^1.2.1",
+		"cookie-parser": "^1.4.3",
+		"jsonwebtoken": "^8.5.1"
 	},
 	"devDependencies": {
-		"localtunnel": "^2.0.2"
+		"localtunnel": "^2.0.2",
+		"nodemon": "^2.0.2"
 	},
 	"main": "server.js",
 	"scripts": {
-		"start": "node server.js"
+		"start": "npm run stop && npm run server",
+		"server": "nodemon ./src/server.js",
+		"stop": "kill-port 3000"
+	},
+	"nodemonConfig": {
+		"watch": [
+			".env",
+			"src/"
+		]
 	}
 }
