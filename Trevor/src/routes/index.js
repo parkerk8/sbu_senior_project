@@ -5,7 +5,7 @@ const router = require('express').Router();
 const toContactsRoute = require('./contacts-integration');
 
 
-//tells the router listen for requsts using the contacts-integration.js file. (i hope)
+//tells the router listen for requsts using the contacts-integration.js file.
 router.use(toContactsRoute); 
 
 

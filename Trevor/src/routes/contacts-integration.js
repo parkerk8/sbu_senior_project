@@ -17,7 +17,7 @@ const authenticationMiddleware = require('../middleware/auth-request').authReque
 //get the required functions to use. 
 
 //when a post request is sent to /demo/print, then first run it threw the authentication, then if that passes, move it on into the actual function. 
-//router.post('/demo/print', authenticationMiddleware, somefucntion);
+//router.post('/create', authenticationMiddleware, somefucntion);
 
 //we aren't doing that yet, we're just printing out the request. 
 router.post('/hi', function (req, res) {
