@@ -3,6 +3,7 @@ async function updateContactInfo (req, res){
   console.log('New Value: ', JSON.stringify(req.body.payload.inboundFieldValues.columnValue));
   console.log('New Column Type: ', JSON.stringify(req.body.payload.inboundFieldValues.columnType));
   console.log('New version of item: ', JSON.stringify(req.body.payload.inboundFieldValues.itemMapping));
+  console.log(" ");
   return res.status(200).send({});
 };
 

@@ -4,7 +4,7 @@ const MAX_ATTEMPTS = 5; //keeps track of max attempts at creating the tunnel
 
 //make a function that accepts a port number, and creats localtunnel at that port, and also has a variable keeping track of the number of times it tried to create the tunnel
 createTunnel = async (port, retries = 0) => {
-	const tunnel = await localtunnel({
+	const tunnel = await localtunnel({    //the await keyword basically just tells the function to not continue running until that functionality has completed. 
 		port,
 		subdomain: process.env.TUNNEL_SUBDOMAIN,
 		host: process.env.TUNNEL_SERVER_HOST
