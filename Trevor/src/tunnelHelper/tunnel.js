@@ -13,6 +13,7 @@ createTunnel = async (port, retries = 0) => {
 	//this will make the local tunnel the same everytime as long as the local tunnel can be created
 	
 	const tunnelUrl = tunnel.url;
+	console.log (tunnelUrl);
 	
 	const usedSubDomain = tunnelUrl.includes(process.env.TUNNEL_SUBDOMAIN);  //a boolean telling if the url we wanted was created, or if a random url was generated instead. 
 	if (!usedSubDomain && retries < MAX_ATTEMPTS) {  //if the number of tries to make the tunnel and it had to use a random url, and it has been less then MAX_RETRYS attemps, then try again.
