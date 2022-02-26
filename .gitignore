@@ -1,3 +1,6 @@
 /Trevor/node_modules
 /Trevor/package-lock.json
 /Trevor/.env
+/IntegrationServer/node_modules
+/IntegrationServer/package-lock.json
+/IntegrationServer/.env
