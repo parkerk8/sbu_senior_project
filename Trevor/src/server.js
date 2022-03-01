@@ -1,8 +1,11 @@
 require('dotenv').config(); //required for us to use process.env
+const fs = require('fs');
+const readline = require('readline');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 const routes = require('./routes');
+const { google } = require('googleapis');
 //leads to the routes folder, each "route" in the route folder signifies a seperate piece of the functionality of the program
 //So each .js file in the routes folder controls a different aspect of the functionality.
 
