@@ -1,4 +1,5 @@
 require('dotenv').config(); //required for us to use process.env
+var axios = require("axios").default;
 const fs = require('fs');
 const readline = require('readline');
 var express = require('express');
@@ -15,7 +16,7 @@ const { createTunnel } = require('./tunnelHelper/tunnel');
 const port = process.env.PORT;
 //get the prot from the .evn file
 
-const { sendAuthUrl } = require('./middleware/auth-sender');
+//const { sendAuthUrl } = require('./middleware/auth-sender');
 
 
 app.use(bodyParser.json()) //this is so we can deal with JSON info in POST requests
@@ -103,4 +104,4 @@ app.listen(port, () => {
 
 
 module.exports = app;
-sendAuthUrl;
+//sendAuthUrl;
