@@ -22,20 +22,17 @@ const port = process.env.PORT;
 app.use(bodyParser.json()) //this is so we can deal with JSON info in POST requests
 
 app.use(function (req, res, next) {
-    //Creates a new token or detects if a token already exists
+    //Creates a new access token or detects if a token already exists
     const client_id = "232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com";
     const client_secret = "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";
     const redirect_uri = "http://localhost:3000";
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uri);
-    console.log("Before token check");
-    //Creates a token from the recieved auth code
+    //Creates an access token from the recieved auth code if one does not already exist
     if (!(fs.existsSync("./token.json"))) {
-        console.log("in the if");
         const TOKEN_PATH = "./token.json"
         const code = req.query['code'];
-        console.log(code);
-
+        //Creates and stores the access token or throws an error message
         oAuth2Client.getToken(code, (err, token) => {
             if (err) return console.error('Error retrieving access token', err);
             console.log(token);
@@ -44,41 +41,21 @@ app.use(function (req, res, next) {
                 console.log('Token stored to', TOKEN_PATH);
                 oAuth2Client.setCredentials(token);
             });
-
-            // Store the token to disk for later program executions
-            //callback(oAuth2Client);
         });
         next();
     }
-    //If the token exists, sets up OAuth2 client
+    //If the access token already exists, sets up OAuth2 client
     else {
-        console.log("in the else");
         const TOKEN_PATH = "./token.json"
         fs.readFile(TOKEN_PATH, (err, token) => {
-            //if (err) return getNewToken(oAuth2Client, callback);
             oAuth2Client.setCredentials(JSON.parse(token));
-            console.log("it work");
+            console.log("Token found");
         });
         next();
     }
-    /*var options = {
-        method: 'POST',
-        url: 'https://oauth2.googleapis.com/token',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        data: {
-            grant_type: 'refresh_token',
-            client_id: '232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com',
-            client_secret:'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',
-            refresh_token: '1//04L2zUVYtcDXWCgYIARAAGAQSNwF-L9IreVYZ9RLI04qQ07IB5lPhf5vP2qkCwMG6VjNqsWXiPHQxH9yXU1Gaqid3BbSlrHtJ4p0'
-        }
-    };*/
 
+    //Sends a post request with the refresh token to recieve a new access token
     console.log("sending refresh token");
-    /*axios.request(options).then(function (response) {
-        console.log(response.data);
-    }).catch(function (error) {
-        console.error(error);
-    });*/
     axios.post('https://oauth2.googleapis.com/token', {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         grant_type: 'refresh_token',
@@ -86,7 +63,7 @@ app.use(function (req, res, next) {
         client_secret: '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',
         refresh_token: '1//04L2zUVYtcDXWCgYIARAAGAQSNwF-L9IreVYZ9RLI04qQ07IB5lPhf5vP2qkCwMG6VjNqsWXiPHQxH9yXU1Gaqid3BbSlrHtJ4p0'
     }).then(function (response) {
-        console.log(response.data);
+        //console.log(response.data);
     }).catch(function (error) {
         console.error(error);
     });
