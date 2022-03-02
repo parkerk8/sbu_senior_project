@@ -27,8 +27,10 @@ app.use(function (req, res, next) {
     const redirect_uri = "http://localhost:3000";
     const oAuth2Client = new google.auth.OAuth2(
         client_id, client_secret, redirect_uri);
+    console.log("Before token check");
     //Creates a token from the recieved auth code
-    if (!("./token.json")) {
+    if (!(fs.existsSync("./token.json"))) {
+        console.log("in the if");
         const TOKEN_PATH = "./token.json"
         const code = req.query['code'];
         console.log(code);
@@ -47,6 +49,48 @@ app.use(function (req, res, next) {
         });
         next();
     }
+    //If the token exists, sets up OAuth2 client
+    else {
+        console.log("in the else");
+        const TOKEN_PATH = "./token.json"
+        fs.readFile(TOKEN_PATH, (err, token) => {
+            //if (err) return getNewToken(oAuth2Client, callback);
+            oAuth2Client.setCredentials(JSON.parse(token));
+            console.log("it work");
+        });
+        next();
+    }
+    /*var options = {
+        method: 'POST',
+        url: 'https://oauth2.googleapis.com/token',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        data: {
+            grant_type: 'refresh_token',
+            client_id: '232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com',
+            client_secret:'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',
+            refresh_token: '1//04L2zUVYtcDXWCgYIARAAGAQSNwF-L9IreVYZ9RLI04qQ07IB5lPhf5vP2qkCwMG6VjNqsWXiPHQxH9yXU1Gaqid3BbSlrHtJ4p0'
+        }
+    };*/
+
+    console.log("sending refresh token");
+    /*axios.request(options).then(function (response) {
+        console.log(response.data);
+    }).catch(function (error) {
+        console.error(error);
+    });*/
+    axios.post('https://oauth2.googleapis.com/token', {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        grant_type: 'refresh_token',
+        client_id: '232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com',
+        client_secret: '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',
+        refresh_token: '1//04L2zUVYtcDXWCgYIARAAGAQSNwF-L9IreVYZ9RLI04qQ07IB5lPhf5vP2qkCwMG6VjNqsWXiPHQxH9yXU1Gaqid3BbSlrHtJ4p0'
+    }).then(function (response) {
+        console.log(response.data);
+    }).catch(function (error) {
+        console.error(error);
+    });
+
+})
 
 app.use(routes); //tells the app to handle requests using the .js files in routes
 
