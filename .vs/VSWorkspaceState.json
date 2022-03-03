@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\TestGmailServer",
+    "\\TestGmailServer\\TestGmailServer",
+    "\\Trevor",
+    "\\Trevor\\src",
+    "\\Trevor\\src\\featureControl",
+    "\\Trevor\\src\\middleware",
+    "\\Trevor\\src\\routes",
+    "\\Trevor\\src\\tunnelHelper"
+  ],
+  "SelectedNode": "\\Trevor\\src\\server.js",
+  "PreviewInSolutionExplorer": false
+}
