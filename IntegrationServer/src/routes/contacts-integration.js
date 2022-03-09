@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-//We may or may not want to split this file into two. I think we will probably do so, but im too lazy to make that happen yet. 
-
 const makeContact = require('../featureControl/makeContact.js').makeNewContact;   
 const updateContact = require('../featureControl/updateContact.js').updateContactInfo;
 const authenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
 //get the required functions to use. 
-
 
 //when a post request is sent to /create, then first run it threw the authentication, then if that passes, move it on into the actual function. 
 router.post('/create', authenticationMiddleware, makeContact);
