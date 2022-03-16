@@ -4,3 +4,6 @@
 /IntegrationServer/node_modules
 /IntegrationServer/package-lock.json
 /IntegrationServer/.env
+/IntegrationServer/token.json
+/TestGmailServer/TestGmailServer/node_modules
+/TestGmailServer/TestGmailServer/package-lock.json

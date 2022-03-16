@@ -18,7 +18,7 @@ app.use(bodyParser.json()) //this is so we can deal with JSON info in POST reque
 
 app.use(function(req, res, next) {
   console.log(req.method + " " + req.path + " - " + req.ip);
-  console.log(req.query);
+  //console.log(req.query);
   next();
 });
 

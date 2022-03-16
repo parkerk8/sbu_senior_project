@@ -3,10 +3,11 @@
 const router = require('express').Router(); 
 
 const toContactsRoute = require('./contacts-integration');
+const integrationSetupRoute = require('./OAuthHelper');
 
 
 //tells the router listen for requsts using the contacts-integration.js file.
 router.use(toContactsRoute); 
-
+router.use(integrationSetupRoute);
 
 module.exports = router;
