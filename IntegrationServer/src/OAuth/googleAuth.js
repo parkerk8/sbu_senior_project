@@ -3,20 +3,56 @@ const fs = require('fs');
 const readline = require('readline');
 const express = require('express');
 const router = express.Router();
-var app = express();
 const NodeCache = require( "node-cache" );
 const myCache = new NodeCache( { stdTTL: 1000, useClones: false});
 
 
+const oAuth2Client = require('../temp').help
 
-const oAuth2Client = new google.auth.OAuth2(
-      "232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com", //YOUR_CLIENT_ID
-	  "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", //YOUR_CLIENT_SECRET
-	  "http://localhost:3000/tokenHandle");
+
 
 const scopes = [
 	'https://www.googleapis.com/auth/contacts'
 	];
+
+
+google.options({auth: oAuth2Client});
+
+
+
+
+async function helpME (req, res, next){
+
+    var service = google.people( {version: 'v1', auth: oAuth2Client});
+	console.log(oAuth2Client);
+	/*service.people.createContact({
+	requestBody: {
+      names: [
+        {
+          displayName: 'Tim Manuel',
+          familyName: 'Manuel',
+          givenName: 'Tim',
+        },
+      ],
+    } 
+	}, (err, res) => { 
+		if (err) return console.error('The API returned an error: ' + err)
+		console.log(" ");
+		console.log(res);	
+	} 
+	);*/
+	service.people.connections.list({
+		resourceName: 'people/me',
+		personFields: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
+	}, (err, res) => { 
+		if (err) return console.error('The API returned an error: ' + err)
+		console.log(" ");
+		console.log(res.data.connections[0]);	
+	}
+  );
+  next();
+  
+};
 
 
 function setUpOAuth (req, res) {
@@ -32,8 +68,7 @@ function setUpOAuth (req, res) {
 				console.error(err);
 				return;
 			}
-            oAuth2Client.setCredentials(JSON.parse(token));
-            console.log("it work 99");
+            oAuth2Client.credentials = JSON.parse(token);;
 			let returnUrl = req.session.backToUrl;
 			return res.redirect(returnUrl);
         });
@@ -53,7 +88,7 @@ function setUpOAuth (req, res) {
 
 function codeHanlde (req, res) {
 	//Creates a new token or detects if a token already exists
-
+	//console.log(JSON.stringify(req.headers));
 	backToUrl = myCache.get("returnURl");
 	
     if (!(fs.existsSync("./token.json"))) {
@@ -63,7 +98,7 @@ function codeHanlde (req, res) {
  
         oAuth2Client.getToken(code, (err, token) => {
             if (err) return console.error('Error retrieving access token', err);
-            oAuth2Client.setCredentials(token);
+            oAuth2Client.credentials = token;
             console.log(token);
             fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
                 if (err) return console.error(err);
@@ -78,14 +113,18 @@ function codeHanlde (req, res) {
        const TOKEN_PATH = "./token.json"
         fs.readFile("./token.json", (err, token) => {
             //if (err) return getNewToken(oAuth2Client, callback);
-            oAuth2Client.setCredentials(JSON.parse(token));
+            oAuth2Client.credentials = JSON.parse(token);
             console.log("it work");
         });
         return res.redirect(backToUrl);
     }
 }
 
+
+
+
 module.exports = {
 	codeHanlde,
-	setUpOAuth
+	setUpOAuth,
+	helpME
 };

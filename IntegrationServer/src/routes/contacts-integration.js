@@ -13,6 +13,7 @@ router.post('/create', authenticationMiddleware, makeContact);
 router.post('/update', authenticationMiddleware, updateContact);
 
 
+
 //when a post request is sent to /print, then first run it threw the authentication, then if that passes, move it on into the actual function. 
 router.post('/print', authenticationMiddleware,function (req, res) {
 	console.log(req.body);
