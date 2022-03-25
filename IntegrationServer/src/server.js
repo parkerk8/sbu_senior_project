@@ -1,4 +1,5 @@
 require('dotenv').config(); //required for us to use process.env
+const fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
