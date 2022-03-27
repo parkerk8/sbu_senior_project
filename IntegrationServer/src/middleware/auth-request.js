@@ -22,6 +22,39 @@ async function authRequestMiddleware(req, res, next) {
   }
 }
 
+async function helpME(req, res, next) {
+
+	var service = google.people({ version: 'v1', auth: oAuth2Client });
+	console.log(oAuth2Client);
+	service.people.createContact({
+		requestBody: {
+			names: [
+				{
+					displayName: 'Tim Manuel',
+					familyName: 'Manuel',
+					givenName: 'Tim',
+				},
+			],
+		}
+	}, (err, res) => {
+		if (err) return console.error('The API returned an error: ' + err)
+		console.log(" ");
+		console.log(res);
+	}
+	);
+	service.people.connections.list({
+		resourceName: 'people/me',
+		personFields: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
+	}, (err, res) => {
+		if (err) return console.error('The API returned an error: ' + err)
+		console.log(" ");
+		console.log(res.data.connections[0]);
+	}
+	);
+	next();
+
+};
+
 async function authOAuthSetUp (req, res, next) {
 	try{
 		let authorization = req.query.token;  //get the authentication info from the request. 
