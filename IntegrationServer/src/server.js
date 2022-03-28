@@ -7,6 +7,8 @@ const routes = require('./routes');
 //leads to the routes folder, each "route" in the route folder signifies a seperate piece of the functionality of the program
 //So each .js file in the routes folder controls a different aspect of the functionality.
 
+const { setOAuthCredentials } = require('./temp.js');
+
 const { createTunnel } = require('./tunnelHelper/tunnel');
 //get the createTunnel function for use in, you quessed it, creating a tunnel. 
 
