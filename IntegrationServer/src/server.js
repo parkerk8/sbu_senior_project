@@ -25,6 +25,8 @@ app.use(function(req, res, next) {
   next();
 });
 
+setOAuthCredentials();
+
 app.use(routes); //tells the app to handle requests using the .js files in routes
 
 //Tell the app to listen at port, and then create a tunnel.
