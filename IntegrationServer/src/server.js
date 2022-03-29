@@ -1,3 +1,4 @@
+//import { access, constants } from 'fs';
 require('dotenv').config(); //required for us to use process.env
 const fs = require('fs');
 var express = require('express');

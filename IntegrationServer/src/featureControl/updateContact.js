@@ -1,23 +1,49 @@
 const fs = require('fs');
 async function updateContactInfo(req, res) {
     //puts monday.com data into one place
-    contact = {
+    updateContact = {
         ItemID: req.body.payload.inboundFieldValues.itemId,
         ColumnID: req.body.payload.inboundFieldValues.columnId,
         NewValue: req.body.payload.inboundFieldValues.columnValue,
         NewVersionOfItem: req.body.payload.inboundFieldValues.itemMapping
     }
-    console.log(contact);
+	console.log(updateContact);
 
     //takes monday.com data and formats it for a json object
-    json = JSON.stringify(contact);
+	json = JSON.stringify(updateContact);
 
     //Creates/replaces the json file of data to be pushed
-    fs.writeFile('./contact.json', json, (err) => {
+	fs.writeFile('./updateContact.json', json, (err) => {
         if (!err) {
             console.log('yes');
         }
     })
+
+	fs.readFile('updateContact.json',
+		function (err, data) {
+			var jsonData = data;
+			var jsonParsed = JSON.parse(jsonData);
+
+			console.log(oAuth2Client);
+			service.people.createContact({
+				requestBody: {
+					names: [
+						{
+							displayName: jsonParsed.ContactName,
+							familyName: jsonParsed.ContactName,
+							//givenName: 'Tim',
+						},
+					],
+				}
+			}, (err, res) => {
+				if (err) return console.error('The API returned an error: ' + err)
+				console.log(" ");
+				console.log(res);
+			}
+			);
+		}
+	)
+
     //jsonfile.writeFile('Item ID: ', JSON.stringify(req.body.payload.inboundFieldValues.itemId)
   
   console.log('Item ID: ', JSON.stringify(req.body.payload.inboundFieldValues.itemId));	
