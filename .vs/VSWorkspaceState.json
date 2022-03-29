@@ -1,15 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\TestGmailServer",
-    "\\TestGmailServer\\TestGmailServer",
+    "\\IntegrationServer",
+    "\\IntegrationServer\\src",
+    "\\IntegrationServer\\src\\featureControl",
+    "\\IntegrationServer\\src\\OAuth",
+    "\\IntegrationServer\\src\\routes",
+    "\\IntegrationServer\\src\\tunnelHelper",
     "\\Trevor",
     "\\Trevor\\src",
-    "\\Trevor\\src\\featureControl",
-    "\\Trevor\\src\\middleware",
-    "\\Trevor\\src\\routes",
     "\\Trevor\\src\\tunnelHelper"
   ],
-  "SelectedNode": "\\Trevor\\src\\server.js",
+  "SelectedNode": "\\IntegrationServer\\src\\featureControl\\updateContact.js",
   "PreviewInSolutionExplorer": false
 }

@@ -6,6 +6,7 @@ var service = google.people({ version: 'v1', auth: oAuth2Client });
 const fs = require('fs');
 async function makeNewContact(req, res) {
 
+	//gets the contact info from monday.com
 	newContact = {
 		ItemID: req.body.payload.inboundFieldValues.itemId,
 		ContactName: req.body.payload.inboundFieldValues.itemMapping.name,
@@ -22,10 +23,14 @@ async function makeNewContact(req, res) {
 		}
 	})
 
+	//Creates the contact in Google Contacts
 	fs.readFile('newContact.json',
 		function (err, data) {
 			var jsonData = data;
 			var jsonParsed = JSON.parse(jsonData);
+
+			fs.appendFile('./itemIDs.txt', jsonParsed.ItemID + "\n", (err) => { })
+			console.log("Updated itemIDs.txt");
 
 			console.log(oAuth2Client);
 			service.people.createContact({
@@ -38,10 +43,12 @@ async function makeNewContact(req, res) {
 						},
 					],
 				}
-			}, (err, res) => {
+			},
+				//Throws an error or creates/appends to the contactIDs file
+				(err, res) => {
 				if (err) return console.error('The API returned an error: ' + err)
-					fs.appendFile('./contactKeys.txt', res.data.resourceName + "\n", (err) => { })
-					console.log("Updated contactKeys.js");
+					fs.appendFile('./contactIDs.txt', res.data.resourceName + "\n", (err) => { })
+					console.log("Updated contactIDs.txt");
 					console.log(" ");
 			}
 			);

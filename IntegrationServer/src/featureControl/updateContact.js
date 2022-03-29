@@ -19,6 +19,7 @@ async function updateContactInfo(req, res) {
         }
     })
 
+	
 	fs.readFile('updateContact.json',
 		function (err, data) {
 			var jsonData = data;
