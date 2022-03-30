@@ -1,4 +1,3 @@
-
 const { google } = require('googleapis');
 const oAuth2Client = require('../temp').help
 google.options({ auth: oAuth2Client });
@@ -32,7 +31,7 @@ async function makeNewContact(req, res) {
 			fs.appendFile('./itemIDs.txt', jsonParsed.ItemID + "\n", (err) => { })
 			console.log("Updated itemIDs.txt");
 
-			console.log(oAuth2Client);
+			//console.log(oAuth2Client);
 			service.people.createContact({
 				requestBody: {
 					names: [
@@ -49,6 +48,8 @@ async function makeNewContact(req, res) {
 				if (err) return console.error('The API returned an error: ' + err)
 					fs.appendFile('./contactIDs.txt', res.data.resourceName + "\n", (err) => { })
 					console.log("Updated contactIDs.txt");
+					fs.appendFile('./etags.txt', res.data.etag + "\n", (err) => { })
+					console.log("Updated etags.txt");
 					console.log(" ");
 			}
 			);

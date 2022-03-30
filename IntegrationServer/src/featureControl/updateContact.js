@@ -18,16 +18,11 @@ async function updateContactInfo(req, res) {
 	json = JSON.stringify(updateContact);
 
 	//Creates/replaces the json file of data to be pushed
-	fs.writeFile('./updateContact.json', json, (err) => {
-		if (!err) {
-			console.log('yes');
-		}
-	})
+	fs.writeFile('./updateContact.json', json, (err) => { })
 
 	var itemIDsArr = fs.readFileSync("./itemIDs.txt")
 		.toString('UTF8')
 		.split('\n');
-	console.log(itemIDsArr);
 
 	var contactIDsArr = fs.readFileSync("./contactIDs.txt")
 		.toString('UTF8')
@@ -59,12 +54,25 @@ async function updateContactInfo(req, res) {
 
 			//console.log(oAuth2Client);
 			console.log(contactEtag);
+			console.log(contactID);
 			service.etag = contactEtag;
 			//console.log(service.people.etag);
 			service.people.updateContact({
 				resourceName: contactID,
+				
+				//headers: {
+					//"If-None-Match": contactEtag,
+                //},
 				//etag: "string",
 				requestBody: {
+
+				metadata: {
+					sources: [
+						{
+							etag: contactEtag,
+						}
+					],
+				},
 
 				names: [
 					{
