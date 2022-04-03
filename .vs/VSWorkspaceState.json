@@ -4,12 +4,9 @@
     "\\IntegrationServer",
     "\\IntegrationServer\\src",
     "\\IntegrationServer\\src\\featureControl",
+    "\\IntegrationServer\\src\\middleware",
     "\\IntegrationServer\\src\\OAuth",
-    "\\IntegrationServer\\src\\routes",
-    "\\IntegrationServer\\src\\tunnelHelper",
-    "\\Trevor",
-    "\\Trevor\\src",
-    "\\Trevor\\src\\tunnelHelper"
+    "\\IntegrationServer\\src\\routes"
   ],
   "SelectedNode": "\\IntegrationServer\\src\\featureControl\\updateContact.js",
   "PreviewInSolutionExplorer": false

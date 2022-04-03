@@ -43,7 +43,7 @@ async function makeNewContact(req, res) {
 					],
 				}
 			},
-				//Throws an error or creates/appends to the contactIDs file
+				//Throws an error or creates/appends to the contactIDs file and etags file
 				(err, res) => {
 				if (err) return console.error('The API returned an error: ' + err)
 					fs.appendFile('./contactIDs.txt', res.data.resourceName + "\n", (err) => { })
