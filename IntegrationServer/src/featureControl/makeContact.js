@@ -12,54 +12,53 @@ async function makeNewContact(req, res) {
 	}
 	console.log(newContact);
 
-	//takes monday.com data and formats it for a json object
-	json = JSON.stringify(newContact);
-
-	//Creates/replaces the json file of data to be pushed
-	fs.writeFile('./newContact.json', json, (err) => {
-		if (!err) {
-			console.log('yes');
+	//Splits the contact into an array to seperate first, middle, last
+	//If there is only a first the other values will be undifined which the api call can handle
+	const nameArr = newContact.ContactName.split(" ");
+	if (newContact.ContactName.includes(" ")) {
+		console.log(nameArr[0]);
+		console.log(nameArr[1]);
+		console.log(nameArr[2]);
+		//If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
+		if (nameArr.length == 2) {
+			nameArr[2] = nameArr[1];
+			nameArr[1] = "";
 		}
-	})
+	}
 
-	//Creates the contact in Google Contacts
-	fs.readFile('newContact.json',
-		function (err, data) {
-			var jsonData = data;
-			var jsonParsed = JSON.parse(jsonData);
+	fs.appendFile('./itemIDs.txt', newContact.ItemID.itemId + "\n", (err) => { })
+	console.log("Updated itemIDs.txt");
 
-			fs.appendFile('./itemIDs.txt', jsonParsed.ItemID + "\n", (err) => { })
-			console.log("Updated itemIDs.txt");
-
-			//console.log(oAuth2Client);
-			service.people.createContact({
-				requestBody: {
-					names: [
-						{
-							displayName: jsonParsed.ContactName,
-							familyName: jsonParsed.ContactName,
-							//givenName: 'Tim',
-						},
-					],
-				}
-			},
-				//Throws an error or creates/appends to the contactIDs file and etags file
-				(err, res) => {
-				if (err) return console.error('The API returned an error: ' + err)
-					fs.appendFile('./contactIDs.txt', res.data.resourceName + "\n", (err) => { })
-					console.log("Updated contactIDs.txt");
-					fs.appendFile('./etags.txt', res.data.etag + "\n", (err) => { })
-					console.log("Updated etags.txt");
-					console.log(" ");
-			}
-			);
+	//calls the people api
+	service.people.createContact({
+		requestBody: {
+			names: [
+				{
+					displayName: newContact.ContactName,
+					familyName: nameArr[2],
+					givenName: nameArr[0],
+					middleName: nameArr[1],
+				},
+			],
 		}
-	)
+	},
+	//Throws an error or creates/appends to the contactIDs file and etags file
+		(err, res) => {
+			if (err) return console.error('The API returned an error: ' + err)
+			fs.appendFile('./contactIDs.txt', res.data.resourceName + "\n", (err) => { })
+			console.log("Updated contactIDs.txt");
+			fs.appendFile('./etags.txt', res.data.etag + "\n", (err) => { })
+			console.log("Updated etags.txt");
+			console.log(" ");
+		}
+	);
+		//}
+	//)
 
-	console.log('Item ID: ', JSON.stringify(req.body.payload.inboundFieldValues.itemId));
-	console.log('Contact Name: ', JSON.stringify(req.body.payload.inboundFieldValues.itemMapping.name));
+	//console.log('Item ID: ', JSON.stringify(req.body.payload.inboundFieldValues.itemId));
+	//console.log('Contact Name: ', JSON.stringify(req.body.payload.inboundFieldValues.itemMapping.name));
 	console.log(" ");
-	console.log(req.query);
+	//console.log(req.query);
 	return res.status(200).send({});
 };
 

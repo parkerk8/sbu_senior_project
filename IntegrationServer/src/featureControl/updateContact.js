@@ -76,7 +76,7 @@ async function updateContactInfo(req, res) {
 						{
 							displayName: jsonParsed.Name,
 							familyName: jsonParsed.Name,
-							//givenName: 'Tim',
+							//givenName:
 						},
 					],
 					emailAddresses: [
