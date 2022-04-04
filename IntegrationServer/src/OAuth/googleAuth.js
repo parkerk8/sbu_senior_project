@@ -24,14 +24,19 @@ google.options({auth: oAuth2Client});
 async function helpME (req, res, next){
 
     var service = google.people( {version: 'v1', auth: oAuth2Client});
-	console.log(oAuth2Client);
-	/*service.people.createContact({
+	//console.log(oAuth2Client);
+	
+	/*service.people.updateContact({
+	resourceName: 'people/c3605388454813633008',
+	sources: 'READ_SOURCE_TYPE_CONTACT',
+	updatePersonFields: 'names',
 	requestBody: {
-      names: [
+	  etag: 'hehehehe',	
+     names: [
         {
-          displayName: 'Tim Manuel',
-          familyName: 'Manuel',
-          givenName: 'Tim',
+          displayName: 'Timmmy Manuel',
+          familyName: 'Manuellly',
+          givenName: 'Timmmy',
         },
       ],
     } 
@@ -41,13 +46,44 @@ async function helpME (req, res, next){
 		console.log(res);	
 	} 
 	);*/
+	
+	let arr1 = []
+	
+	arr1.push({value: 'what@help.no',type: 'work',formattedType: 'Work'});
+	arr1.push({value: 'gone@forever',type: 'other',formattedType: 'Other'});
+	
+	console.log(arr1);
+	
+	/*service.people.createContact({
+	requestBody: {
+		names: [
+			{
+			displayName: 'Test Manuel',
+			familyName: 'Manuel',
+			givenName: 'Test',
+			},
+		],
+		emailAddresses: arr1,
+    } 
+	}, (err, res) => { 
+		if (err) return console.error('The API returned an error: ' + err)
+		console.log(" ");
+		console.log(res);	
+	} 
+	);*/
+	
+	
 	service.people.connections.list({
+		pageSize:10,
 		resourceName: 'people/me',
 		personFields: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
 	}, (err, res) => { 
 		if (err) return console.error('The API returned an error: ' + err)
+		console.log(res.data.nextPageToken)
 		console.log(" ");
-		console.log(res.data.connections[0]);	
+		console.log(res.data.connections[1]);
+		var arr = res.data.connections;
+		console.log(arr.length);
 	}
   );
   next();
