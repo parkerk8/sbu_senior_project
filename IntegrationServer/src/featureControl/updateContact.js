@@ -80,7 +80,7 @@ async function updateContactInfo(req, res) {
 					displayName: updateContact.SecondaryEmail,
 				},
 			],
-			/*phoneNumbers: [
+			phoneNumbers: [
 				{
 					value: updateContact.WorkPhone,
 					type: "Work",
@@ -95,7 +95,7 @@ async function updateContactInfo(req, res) {
 					name: updateContact.Company,
 					title: updateContact.Role,
                 }
-			]*/
+			]
 		},
 	},
 
