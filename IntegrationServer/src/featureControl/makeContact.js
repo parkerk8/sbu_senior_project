@@ -10,23 +10,19 @@ async function makeNewContact(req, res) {
 		ItemID: req.body.payload.inboundFieldValues.itemId,
 		ContactName: req.body.payload.inboundFieldValues.itemMapping.name,
 	}
-	console.log(newContact);
 
 	//Splits the contact into an array to seperate first, middle, last
 	//If there is only a first the other values will be undifined which the api call can handle
 	const nameArr = newContact.ContactName.split(" ");
-	if (newContact.ContactName.includes(" ")) {
-		console.log(nameArr[0]);
-		console.log(nameArr[1]);
-		console.log(nameArr[2]);
-		//If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
-		if (nameArr.length == 2) {
-			nameArr[2] = nameArr[1];
-			nameArr[1] = "";
-		}
-	}
 
-	fs.appendFile('./itemIDs.txt', newContact.ItemID.itemId + "\n", (err) => { })
+	//If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
+	if (nameArr.length == 2) {
+		nameArr[2] = nameArr[1];
+		nameArr[1] = "";
+	}
+	
+	//Creates or updates the itemIDs.txt file
+	fs.appendFile('./itemIDs.txt', newContact.ItemID + "\n", (err) => { })
 	console.log("Updated itemIDs.txt");
 
 	//calls the people api
@@ -42,6 +38,7 @@ async function makeNewContact(req, res) {
 			],
 		}
 	},
+
 	//Throws an error or creates/appends to the contactIDs file and etags file
 		(err, res) => {
 			if (err) return console.error('The API returned an error: ' + err)
@@ -52,13 +49,7 @@ async function makeNewContact(req, res) {
 			console.log(" ");
 		}
 	);
-		//}
-	//)
 
-	//console.log('Item ID: ', JSON.stringify(req.body.payload.inboundFieldValues.itemId));
-	//console.log('Contact Name: ', JSON.stringify(req.body.payload.inboundFieldValues.itemMapping.name));
-	console.log(" ");
-	//console.log(req.query);
 	return res.status(200).send({});
 };
 
