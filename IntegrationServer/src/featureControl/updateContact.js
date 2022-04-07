@@ -9,12 +9,12 @@ async function updateContactInfo(req, res) {
 		ItemID: req.body.payload.inboundFieldValues.itemId,
 		Name: req.body.payload.inboundFieldValues.itemMapping.name,
 		ColumnID: req.body.payload.inboundFieldValues.columnId,
-		PrimaryEmail: req.body.payload.inboundFieldValues.itemMapping.text,
-		SecondaryEmail: req.body.payload.inboundFieldValues.itemMapping.text_1,
-		WorkPhone: req.body.payload.inboundFieldValues.itemMapping.text9,
-		MobilePhone: req.body.payload.inboundFieldValues.itemMapping.text6,
-		Company: req.body.payload.inboundFieldValues.itemMapping.text95,
-		Role: req.body.payload.inboundFieldValues.itemMapping.text7,
+		PrimaryEmail: req.body.payload.inboundFieldValues.itemMapping.text8,
+		SecondaryEmail: req.body.payload.inboundFieldValues.itemMapping.text9,
+		WorkPhone: req.body.payload.inboundFieldValues.itemMapping.text3,
+		MobilePhone: req.body.payload.inboundFieldValues.itemMapping.text5,
+		Company: req.body.payload.inboundFieldValues.itemMapping.text,
+		Role: req.body.payload.inboundFieldValues.itemMapping.text6,
 		//NewVersionOfItem: req.body.payload.inboundFieldValues.itemMapping
 	}
 	console.log(req.body.payload.inboundFieldValues);
@@ -57,15 +57,15 @@ async function updateContactInfo(req, res) {
 	//console.log(jsonParsed.NewValue);
 	service.people.updateContact({
 		resourceName: contactID,
-		updatePersonFields: "emailAddresses,names,phoneNumbers,orginizations",
+		updatePersonFields: "emailAddresses,names,phoneNumbers,organizations",
 		requestBody: {
 			etag: contactEtag,
 			names: [
 				{
 					displayName: updateContact.Name,
-					givenName: nameArr[1],
+					givenName: nameArr[0],
 					middleName: nameArr[2],
-					familyName: nameArr[3],
+					familyName: nameArr[1],
 				},
 			],
 			emailAddresses: [

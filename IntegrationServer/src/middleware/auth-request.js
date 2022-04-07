@@ -46,6 +46,3 @@ module.exports = {
   authRequestMiddleware,
   authOAuthSetUp
 };
-
-
-//you need to
