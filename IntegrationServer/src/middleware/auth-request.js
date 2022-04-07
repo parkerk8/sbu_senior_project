@@ -22,6 +22,7 @@ async function authRequestMiddleware(req, res, next) {
   }
 }
 
+
 async function authOAuthSetUp (req, res, next) {
 	try{
 		let authorization = req.query.token;  //get the authentication info from the request. 
@@ -45,6 +46,3 @@ module.exports = {
   authRequestMiddleware,
   authOAuthSetUp
 };
-
-
-//you need to

@@ -1,10 +1,14 @@
+//import { access, constants } from 'fs';
 require('dotenv').config(); //required for us to use process.env
+const fs = require('fs');
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 const routes = require('./routes');  
 //leads to the routes folder, each "route" in the route folder signifies a seperate piece of the functionality of the program
 //So each .js file in the routes folder controls a different aspect of the functionality.
+
+const { setOAuthCredentials } = require('./temp.js');
 
 const { createTunnel } = require('./tunnelHelper/tunnel');
 //get the createTunnel function for use in, you quessed it, creating a tunnel. 
@@ -21,6 +25,8 @@ app.use(function(req, res, next) {
   //console.log(req.query);
   next();
 });
+
+setOAuthCredentials();
 
 app.use(routes); //tells the app to handle requests using the .js files in routes
 
