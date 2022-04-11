@@ -81,7 +81,7 @@ async function helpME (req, res, next){
 		if (err) return console.error('The API returned an error: ' + err)
 		console.log(res.data.nextPageToken)
 		console.log(" ");
-		console.log(res.data.connections[1]);
+		console.log(res.data.connections[0]);
 		var arr = res.data.connections;
 		console.log(arr.length);
 	}
