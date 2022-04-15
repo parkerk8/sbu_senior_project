@@ -6,7 +6,10 @@ async function authRequestMiddleware(req, res, next) {
 	try{
 		//console.log(req.body);
 		let authorization = req.headers.authorization;  //get the authentication info from the request. 
-	
+		if (!authorization && req.query) {
+			authorization = req.query.token;
+		}
+		
 		//at this point, we actually try and verify the request. 
 		//If the verifiy function fails, then we know that the request wasn't sent from our Monday app.
 		const {accountId, userId, backToUrl, shortLivedToken } = jswtoken.verify(
@@ -14,6 +17,7 @@ async function authRequestMiddleware(req, res, next) {
 			process.env.MONDAY_SIGNING_SECRET
 		);  
 		
+		req.session = { accountId, userId, backToUrl, shortLivedToken };
 		next();
 	}
 	catch (err) {
