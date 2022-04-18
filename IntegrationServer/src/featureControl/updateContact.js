@@ -14,13 +14,18 @@ async function updateContactInfo (req, res){
 	let arrPhoneNumber = [];
 	let arrNotes = [];
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
-	
-	let name = req.body.payload.inboundFieldValues.itemMapping.name
-	let primaryEmail = req.body.payload.inboundFieldValues.itemMapping.email
-	let secondaryEmail = req.body.payload.inboundFieldValues.itemMapping.email2
-	let workPhone = req.body.payload.inboundFieldValues.itemMapping.phone
-	let mobilePhone = req.body.payload.inboundFieldValues.itemMapping.phone7
-	let notes = req.body.payload.inboundFieldValues.itemMapping.text4
+
+	let itemMap = req.body.payload.inboundFieldValues.itemMapping
+	console.log(itemMap)
+
+
+
+	let name = itemMap.name
+	let primaryEmail = itemMap.email
+	let secondaryEmail = itemMap.email2
+	let workPhone = itemMap.phone
+	let mobilePhone = itemMap.phone7
+	let notes = itemMap.text4
 	
 	if(name != undefined)
 	{
