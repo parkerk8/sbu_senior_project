@@ -6,7 +6,7 @@ const service = google.people({version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-let {workPhoneId, mobilePhoneID, primaryEmailID, secondaryEmailID, notesID} = require('../config/config-helper.js');
+let {configVariables} = require('../config/config-helper.js');
 
 async function updateContactInfo(req, res){
 	//puts monday.com data into one place
@@ -16,11 +16,11 @@ async function updateContactInfo(req, res){
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
 	
 	let name = itemMap.name
-	let primaryEmail = itemMap.email
-	let secondaryEmail = itemMap.email2
-	let workPhone = itemMap.phone
-	let mobilePhone = itemMap.phone7
-	let notes = itemMap.text4
+	let primaryEmail = itemMap[configVariables.primaryEmailID];
+	let secondaryEmail = itemMap[configVariables.secondaryEmailID];
+	let workPhone = itemMap[configVariables.workPhoneId];
+	let mobilePhone = itemMap[configVariables.mobilePhoneID];
+	let notes = itemMap[configVariables.notesID];
 	
 	//Splits the contact into an array to seperate first, middle, last
 	//If there is only a first the other values will be undifined which the api call can handle

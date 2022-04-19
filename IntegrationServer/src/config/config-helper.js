@@ -13,7 +13,7 @@ const configVariables = {
 	"primaryEmailID": '',
 	"secondaryEmailID": '',
 	"notesID": '',
-	"createNewDatabase": 'true'
+	"createNewDatabase": true
 }
 
 async function setConfigVariables (config){
