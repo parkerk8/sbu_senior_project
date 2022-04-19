@@ -1,10 +1,12 @@
 const {google} = require('googleapis');
-const oAuth2Client = require('../temp').help
-google.options({auth: oAuth2Client});
+const OAuth2Client = require('../OAuth/googleAuth.js').OAuthClient
+google.options({auth: OAuth2Client});
 
-const service = google.people({version: 'v1', auth: oAuth2Client});
+const service = google.people({version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
+
+let {workPhoneId, mobilePhoneID, primaryEmailID, secondaryEmailID, notesID} = require('../config/config-helper.js');
 
 async function updateContactInfo(req, res){
 	//puts monday.com data into one place
@@ -73,8 +75,8 @@ async function updateContactInfo(req, res){
 				names: [
 					{
 						givenName: nameArr[0],
-						middleName: nameArr[2],
-						familyName: nameArr[1],
+						middleName: nameArr[1],
+						familyName: nameArr[2],
 					},
 				],
 				emailAddresses: [

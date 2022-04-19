@@ -7,7 +7,8 @@ const routes = require('./routes');
 //So each .js file in the routes folder controls a different aspect of the functionality.
 
 const {createTunnel} = require('./tunnelHelper/tunnel');
-const {setOAuthCredentials} = require('./temp.js');
+const {setOAuthCredentials} = require('./startup-helper.js');
+const {loadConfigVariables} = require('./startup-helper.js');											   
 
 //get the createTunnel function for use in, you quessed it, creating a tunnel. 
 
@@ -25,6 +26,7 @@ app.use(function(req, res, next) {
 
 setOAuthCredentials();
 
+loadConfigVariables();					  
 app.use(routes); //tells the app to handle requests using the .js files in routes
 
 
