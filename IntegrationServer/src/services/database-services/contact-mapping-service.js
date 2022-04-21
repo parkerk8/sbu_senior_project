@@ -3,7 +3,7 @@ const { ContactMapping } = require('../../db/models');
 const getContactMapping = async (itemID) => {
   try {
     const queryResult = await ContactMapping.findByPk(itemID);
-	console.log(queryResult);
+	//console.log(queryResult);
     return queryResult;
   } catch (err) {
     console.error(err);
@@ -42,8 +42,22 @@ const updateContactMapping = async (itemID, updates) => {
   }
 };
 
+const deleteDatabse = async () => {
+  try {
+	  await ContactMapping.destroy(
+      {
+        where: {},
+		truncate: true
+      }
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 module.exports = {
 	getContactMapping,
 	createContactMapping,
-	updateContactMapping
+	updateContactMapping,
+	deleteDatabse
 };
