@@ -12,12 +12,27 @@ const fs = require('fs');
 var {configVariables} = require('../config/config-helper.js');
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables;
 
-												 
+
+
+
+var populateLock = true; 
+//Monday will send a duplicate request if it doesn't get a responce in 30 seconds.
+//This is very much an issue with the populate function, which takes far longer than that to execute.
+//Since we can assume it takes at least seconds for 
+ 
 async function makeNewContact(req, res){
 	//gets the contact info from monday.com
 	let itemMap = req.body.payload.inboundFieldValues.itemMapping
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
 	
+	let itemMapping = await contactMappingService.getContactMapping(itemID); 
+	if(itemMapping != null)
+	{
+		console.log("Mapping already exists: aborting make contact");
+		return res.status(200).send({}); 
+	}
+	else
+	{
 	let name = itemMap.name
 	let primaryEmail = itemMap[configVariables.primaryEmailID];
 	let secondaryEmail = itemMap[configVariables.secondaryEmailID];
@@ -117,8 +132,8 @@ async function makeNewContact(req, res){
 			});	
 		} 
 	);
-
 	return res.status(200).send({});
+	}
 };
 
 
@@ -129,37 +144,43 @@ async function populateContacts(req, res)
 	let {createNewDatabase} = configVariables;
 	console.log(createNewDatabase);
 	
-	if(createNewDatabase === true)
+	if(populateLock) //Doing it like this is very hacky, find a better way if possible. It does, however, work. So, for now we leave it.
 	{
-		let err = await initalSetupGoogleContacts(boardItems);
-		if(err)
+		populateLock = false;
+		if(createNewDatabase === true)
 		{
-			console.error(err);
-			return res.status(500).json({ error: 'Internal Server Error' });
+			let err = await initalSetupGoogleContacts(boardItems);
+			populateLock = true;
+			if(err)
+			{
+				console.error(err);
+			}
+			console.log("Sync finished");
+			return res.status(200).send({});
+		}
+		else if(createNewDatabase === false)
+		{
+			let err = await syncWithExistingContacts(boardItems)
+			populateLock = true;
+			if(err)
+			{
+				console.error(err);
+			}
+			console.log("Sync finished");
+			return res.status(200).send({});
 		}
 		else
 		{
-			return res.status(200).send({});
-		}
-	}
-	else if(createNewDatabase === false)
-	{
-		let err = await syncWithExistingContacts(boardItems)
-		if(err)
-		{
-			console.error(err);
+			populateLock = true;
+			console.error("uh oh big trouble");
 			return res.status(500).json({ error: 'Internal Server Error' });
-		}
-		else
-		{
-			return res.status(200).send({});
 		}
 	}
 	else
 	{
-		console.error("uh oh big trouble");
-		return res.status(500).json({ error: 'Internal Server Error' });
-	}	
+		console.log("stop");
+		return res.status(200).send({});
+	}
 }
 
 
@@ -168,9 +189,16 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 	let doConfig = true;
 	
 	await contactMappingService.deleteDatabse();
+	console.log(boardItems.length);
 	
 	while(boardItemIndex < boardItems.length)
 	{
+
+		if((boardItemIndex + 1) % 20 == 0)
+		{
+			await sleep(20000);
+		}
+
 		let columnValuesIndex = 0;
 		let currentItem = boardItems[boardItemIndex];
 		
@@ -301,7 +329,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 					biographies: arrNotes,
 				}
 			}, async (err, res) => {
-				if (err) return 'The API returned an error: ' + err;
+				if (err) console.error('The API returned an error: ' + err);
 				await contactMappingService.createContactMapping({
 					itemID,
 					resourceName: res.data.resourceName,
@@ -321,6 +349,11 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	
 	while(boardItemIndex < boardItems.length)
 	{
+		if((boardItemIndex + 1) % 20 == 0)
+		{
+			await sleep(20000);
+		}
+		
 		let columnValuesIndex = 0;
 		let currentItem = boardItems[boardItemIndex];
 		
@@ -438,7 +471,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 				columnValuesIndex++;
 			}
 			
-			itemMapping = await contactMappingService.getContactMapping(itemID);   //As an example.
+			itemMapping = await contactMappingService.getContactMapping(itemID); 
 			if(itemMapping == null)
 			{
 				await service.people.createContact({
@@ -455,7 +488,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 						biographies: arrNotes,
 					}
 				}, async (err, res) => {
-					if (err) return 'The API returned an error: ' + err;
+					if (err) console.error('The API returned an error: ' + err);
 					await contactMappingService.createContactMapping({
 						itemID,
 						resourceName: res.data.resourceName,
@@ -483,7 +516,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 						biographies: arrNotes,
 					} 
 				}, async (err, res) => { 
-						if (err) return console.error('The API returned an error: ' + err);
+						if (err) console.error('The API returned an error: ' + err);
 						await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});	
 					} 
 				);
@@ -493,6 +526,15 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	}
 	return null;
 }
+
+
+function sleep(ms) {
+	console.log("Please wait warmly, APIs are resting");
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
+	});
+}
+
 
 module.exports = {
 	makeNewContact,
