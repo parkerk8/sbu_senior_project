@@ -10,7 +10,9 @@ let {configVariables} = require('../config/config-helper.js');
 
 async function updateContactInfo(req, res){
 	//puts monday.com data into one place
+	console.log(" ");
 	await console.log(Date.now());
+
 		
 	let itemMap = req.body.payload.inboundFieldValues.itemMapping
 	let changedCollumnId = req.body.payload.inboundFieldValues.columnId
@@ -67,8 +69,24 @@ async function updateContactInfo(req, res){
 	
 		try{
 			let {resourceName, etag} = await contactMappingService.getContactMapping(itemID);
+			let help = await update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, update);
+			console.log(help);
+		}
+		catch(err) {
+			console.log("Catch block err: " + err);
+		}
+		return res.status(200).send({});
+	}
+	else
+	{
+		console.log("no change");
+		return res.status(200).send({});
+	}
+}
 
-			await service.people.updateContact({
+
+async function update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, callback = undefined){
+	await service.people.updateContact({
 				resourceName: resourceName,
 				sources: 'READ_SOURCE_TYPE_CONTACT',
 				updatePersonFields: 'biographies,emailAddresses,names,phoneNumbers',
@@ -113,25 +131,28 @@ async function updateContactInfo(req, res){
 					],
 				} 
 			}, async (err, res) => { 
-				if (err) return console.error('The API returned an error: ' + err);
-			
-				await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});
-				console.log("done");
-				await console.log(Date.now());	
+				if (err)
+				{
+					console.log('The API returned an error: ' + err);
+					service.people.get({
+						resourceName: resourceName,
+						personFields: 'metadata',
+					}, (err, res) => { 
+						if (err) return console.error('The API returned an error: ' + err);
+						if(callback) callback(res.data.resourceName, res.data.etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes);
+					});
+				}
+				else
+				{
+					await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});
+					console.log("done");
+					console.log(Date.now());
+				}
 			} 
-			);
-		}
-		catch(err) {
-			console.log("Catch block err: " + err);
-		}
-		return res.status(200).send({});
-	}
-	else
-	{
-		console.log("no change");
-		return res.status(200).send({});
-	}
-};
+		);
+}
+
+
 
 module.exports = {
 	updateContactInfo,
