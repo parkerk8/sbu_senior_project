@@ -1,5 +1,5 @@
 const {google} = require('googleapis');
-const OAuth2Client = require('../OAuth/googleAuth.js').OAuthClient
+const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
 const service = google.people({version: 'v1', auth: OAuth2Client});

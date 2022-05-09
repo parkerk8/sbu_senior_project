@@ -1,6 +1,6 @@
 {
-	"name": "Tester",
-	"version": "0.1.0",
+	"name": "Contacts-Integration",
+	"version": "1.0.0",
 	"dependencies": {
 		"async-mutex": "^0.3.2",
 		"body-parser": "^1.15.2",

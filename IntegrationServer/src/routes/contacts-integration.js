@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const makeContact = require('../featureControl/makeContact.js').makeNewContact;   
-const updateContact = require('../featureControl/updateContact.js').updateContactInfo;
+const makeContact = require('../featureControl/make-contact.js').makeNewContact;   
+const updateContact = require('../featureControl/update-contact.js').updateContactInfo;
 const authenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
 const {populateContacts} = require('../featureControl/sync-contacts.js');
 //get the required functions to use. 

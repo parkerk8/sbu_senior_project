@@ -4,7 +4,7 @@ const fs = require('fs');
 const {setConfigVariables} = require('./config/config-helper.js');
 
 
-const OAuth2Client = require('./OAuth/googleAuth.js').OAuthClient
+const OAuth2Client = require('./OAuth/google-auth.js').OAuthClient
 
 
 async function setOAuthCredentials () {
