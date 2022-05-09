@@ -212,7 +212,9 @@ function codeHanlde (req, res) {
 	//Creates a new token or detects if a token already exists
 	//console.log(JSON.stringify(req.headers));
 	backToUrl = myCache.get("returnURl");
-	
+	if(backToUrl == undefined) return res.status(200).send({});
+	else{
+	myCache.del("returnURl");	
     if (!(fs.existsSync("./token.json"))) {
         const TOKEN_PATH = "./token.json"
         const code = req.query['code'];
@@ -240,6 +242,7 @@ function codeHanlde (req, res) {
         });
         return res.redirect(backToUrl);
     }
+	}
 }
 
 function sleep(ms) {
