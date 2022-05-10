@@ -6,8 +6,10 @@
     "\\IntegrationServer\\src\\featureControl",
     "\\IntegrationServer\\src\\middleware",
     "\\IntegrationServer\\src\\OAuth",
-    "\\IntegrationServer\\src\\routes"
+    "\\IntegrationServer\\src\\routes",
+    "\\TestGmailServer\\TestGmailServer",
+    "\\Trevor\\src"
   ],
-  "SelectedNode": "\\IntegrationServer\\src\\featureControl\\updateContact.js",
+  "SelectedNode": "\\IntegrationServer\\src\\OAuth\\google-auth.js",
   "PreviewInSolutionExplorer": false
 }
