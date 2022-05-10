@@ -6,11 +6,15 @@ const router = express.Router();
 const NodeCache = require( "node-cache" );
 const myCache = new NodeCache( { stdTTL: 1000, useClones: false});
 
+let { configVariables } = require('../config/config-helper.js');
 
 const OAuth2Client = new google.auth.OAuth2(
-      "232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com", //YOUR_CLIENT_ID
-	  "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", //YOUR_CLIENT_SECRET
-	  "http://localhost:3000/tokenHandle") //backToUrl
+	configVariables.clientId,
+	configVariables.clientSecret,
+	configVariables.backToUrl)
+	  //"232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com", //YOUR_CLIENT_ID
+	  //"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", //YOUR_CLIENT_SECRET
+	  //"http://localhost:3000/tokenHandle") //backToUrl
 
 
 
