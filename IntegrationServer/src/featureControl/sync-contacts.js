@@ -86,7 +86,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 	while(boardItemIndex < boardItems.length)
 	{
 
-		if((boardItemIndex + 1) % 20 == 0)
+		if((boardItemIndex + 1) % 27 == 0)
 		{
 			await sleep(20000);
 		}
@@ -241,7 +241,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	
 	while(boardItemIndex < boardItems.length)
 	{
-		if((boardItemIndex + 1) % 20 == 0)
+		if((boardItemIndex + 1) % 14 == 0)
 		{
 			await sleep(20000);
 		}

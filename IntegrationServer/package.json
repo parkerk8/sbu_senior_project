@@ -16,7 +16,8 @@
 		"node-forge": "^1.3.0",
 		"readline": "^1.3.0",
 		"sequelize": "^6.3.5",
-		"sqlite3": "^5.0.4"
+		"sqlite3": "^5.0.4",
+		"node-schedule": "^2.1.0"
 	},
 	"devDependencies": {
 		"localtunnel": "^2.0.2",
