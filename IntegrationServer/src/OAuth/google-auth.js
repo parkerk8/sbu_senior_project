@@ -31,7 +31,7 @@ async function backupme() {
 	ReadContact(service);
 }
 //repeat runs
-backupme();
+//backupme();
 
 //writes contact info into an array
 async function ReadContact(service, nxt_token = null) {

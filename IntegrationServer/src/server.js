@@ -10,6 +10,10 @@ const {createTunnel} = require('./tunnelHelper/tunnel');
 const {setOAuthCredentials} = require('./startup-helper.js');
 const {loadConfigVariables} = require('./startup-helper.js');											   
 
+require('./OAuth/token-store-periodic.js');
+
+
+
 //get the createTunnel function for use in, you quessed it, creating a tunnel. 
 
 const port = process.env.PORT;
@@ -26,7 +30,8 @@ app.use(function(req, res, next) {
 
 setOAuthCredentials();
 
-loadConfigVariables();					  
+loadConfigVariables();
+
 app.use(routes); //tells the app to handle requests using the .js files in routes
 
 
