@@ -5,7 +5,6 @@ const { ContactMapping } = require('../../db/models');
 const getContactMapping = async (itemID) => {
   try {
     const queryResult = await ContactMapping.findByPk(itemID);
-	//console.log(queryResult);
     return queryResult;
   } catch (err) {
     console.error(err);
@@ -20,7 +19,6 @@ const createContactMapping = async (attributes) => {
 			resourceName,
 			etag,
 		});	
-		//console.log(newContactMapping);
 	}
 	catch (err) {
 		console.log(err);

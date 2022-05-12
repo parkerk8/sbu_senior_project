@@ -13,9 +13,10 @@ async function backupme() {
 	console.log(OAuth2Client);
 	ReadContact(service);
 }
+
 //repeat runs
 schedule.scheduleJob('* * * * * 6', backupme);
-//backupme();
+
 
 let ts = Date.now();
 

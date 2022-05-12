@@ -2,7 +2,7 @@ const {google} = require('googleapis');
 const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
-/* Importing the configVariables from the config-helper.js file. */
+
 const service = google.people( {version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
@@ -10,6 +10,7 @@ const contactMappingService = require('../services/database-services/contact-map
 const {getBoardItems} = require('../services/monday-service.js');
 const fs = require('fs');
 
+/* Import the configVariables from the config-helper.js file. */
 var {configVariables} = require('../config/config-helper.js');
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables;
 
@@ -19,7 +20,7 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
 var populateLock = true; 
 //Monday will send a duplicate request if it doesn't get a response in 30 seconds.
 //This is very much an issue with the populate function, which takes far longer than that to execute.
-//Since we can assume it takes at least seconds for 
+//This lock varibale is used to prevent multiple sync requests happening simultaniusly 
 
 
 /**
@@ -32,7 +33,7 @@ async function populateContacts(req, res)
 {
 	const boardItems = await getBoardItems(req.session.shortLivedToken, req.body.payload.inputFields.boardID)
 	let {createNewDatabase} = configVariables;
-	console.log(createNewDatabase);
+	console.log("Create new database = " + createNewDatabase);
 	
 	if(populateLock) //Doing it like this is very hacky, find a better way if possible. It does, however, work. So, for now we leave it.
 	{
@@ -62,13 +63,13 @@ async function populateContacts(req, res)
 		else
 		{
 			populateLock = true;
-			console.error("uh oh big trouble");
+			console.error("Error, config variables corrupt");
 			return res.status(500).json({ error: 'Internal Server Error' });
 		}
 	}
 	else
 	{
-		console.log("stop");
+		console.log("Stop, only one sync allowed at once");
 		return res.status(200).send({});
 	}
 }

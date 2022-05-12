@@ -25,97 +25,14 @@ const scopes = [
 
 google.options({auth: OAuth2Client});
 
-async function helpME (req, res, next){
-
-    var service = google.people( {version: 'v1', auth: OAuth2Client});
-	//console.log(OAuth2Client);
-	
-	/*service.people.updateContact({
-	resourceName: 'people/c3605388454813633008',
-	sources: 'READ_SOURCE_TYPE_CONTACT',
-	updatePersonFields: 'names',
-	requestBody: {
-	  etag: 'hehehehe',	
-     names: [
-        {
-          displayName: 'Timmmy Manuel',
-          familyName: 'Manuellly',
-          givenName: 'Timmmy',
-        },
-      ],
-    } 
-	}, (err, res) => { 
-		if (err) return console.error('The API returned an error: ' + err)
-		console.log(" ");
-		console.log(res);	
-	} 
-	);*/
-	
-	/*let arr1 = []
-	
-	arr1.push({value: 'what@help.no',type: 'work',formattedType: 'Work'});
-	arr1.push({value: 'gone@forever',type: 'other',formattedType: 'Other'});
-	
-	console.log(arr1);
-	*/
-	/*service.people.createContact({
-	requestBody: {
-		names: [
-			{
-			displayName: 'Test Manuel',
-			familyName: 'Manuel',
-			givenName: 'Test',
-			},
-		],
-		emailAddresses: arr1,
-    } 
-	}, (err, res) => { 
-		if (err) return console.error('The API returned an error: ' + err)
-		console.log(" ");
-		console.log(res);	
-	} 
-	);*/
-	
-	
-	/*service.people.connections.list({
-		pageSize:10,
-		resourceName: 'people/me',
-		personFields: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
-	}, (err, res) => { 
-		if (err) return console.error('The API returned an error: ' + err)
-		console.log(res.data.nextPageToken)
-		console.log(" ");
-		console.log(res.data.connections[0]);
-		var arr = res.data.connections;
-		console.log(arr.length);
-	}
-  );*/
-  
-	service.people.get({
-		resourceName: 'people/c5262138362990476404',
-		personFields: 'addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined'
-	}, (err, res) => { 
-		if (err) return console.error('The API returned an error: ' + err)
-		console.log(" ");
-		console.log(res.data);
-	}
-  );
-  next();
-  
-};
-
-
 /**
- * If the token.json file exists, then read it and redirect to the page that called the function. 
- * If the token.json file doesn't exist, then generate a url and redirect to it.
+ * 
+ * 
  * @param req - The request object.
  * @param res - The response object.
- * @returns The URL to the Google OAuth2 page.
+ * @returns The a redirect to URL to the Google OAuth2 page, or a redirect back to Monday.com.
  */
-function setUpOAuth (req, res) {
-	console.log(req.session.backToUrl);
-	console.log("Hello");
-	
+function setUpOAuth (req, res) {	
 	if (fs.existsSync("./token.json")) 
 	{
 		const TOKEN_PATH = "./token.json"
@@ -132,8 +49,7 @@ function setUpOAuth (req, res) {
 	}
 	else
 	{
-	console.log("why");
-	myCache.set( "returnURl", req.session.backToUrl);
+	myCache.set("returnURl", req.session.backToUrl);
 	
 	let url = OAuth2Client.generateAuthUrl({
 		access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
@@ -145,7 +61,6 @@ function setUpOAuth (req, res) {
 
 function codeHanlde (req, res) {
 	//Creates a new token or detects if a token already exists
-	//console.log(JSON.stringify(req.headers));
 	backToUrl = myCache.get("returnURl");
 	if(backToUrl == undefined) return res.status(200).send({});
 	else{
@@ -171,9 +86,8 @@ function codeHanlde (req, res) {
     else {
        const TOKEN_PATH = "./token.json"
         fs.readFile("./token.json", (err, token) => {
-            //if (err) return getNewToken(OAuth2Client, callback);
+            if (err) return console.error(err);
             OAuth2Client.credentials = JSON.parse(token);
-            console.log("it work");
         });
         return res.redirect(backToUrl);
     }
@@ -183,6 +97,5 @@ function codeHanlde (req, res) {
 module.exports = {
 	codeHanlde,
 	setUpOAuth,
-	helpME,
 	'OAuthClient': OAuth2Client
 };

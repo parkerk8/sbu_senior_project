@@ -10,6 +10,7 @@ google.options({auth: OAuth2Client});
 schedule.scheduleJob('0 * * * *', useAccessToken); 
 
 
+
 function useAccessToken() {
 	if(!(Object.keys(OAuth2Client.credentials).length === 0))//prevent it from running if no credentials are set
 	{
@@ -47,16 +48,16 @@ function updateToken(){
 			{
 				fs.writeFile("./token.json", credentials, (err) => {
 					if (err) return console.error(err);
-					console.log('cached token updated');
+					console.log('Cached token updated');
 				});
 			}
 			else
 			{
-				console.log('no car');
+				console.log('No updated to cached token');
 			}	
        });
 	}
-	console.log("hi");
+	console.log("Update Cached token attemped");
 }
 
 module.exports = {

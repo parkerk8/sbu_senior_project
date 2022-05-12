@@ -41,7 +41,6 @@ async function makeNewContact(req, res){
 	
 	
 	//Try to format moble and work phones 
-	//TO DO: Add a way for extentions column to be included. Will probably just need a check for it's existance. 
 	if(workPhone != undefined)
 	{
 		console.log(workPhone);
