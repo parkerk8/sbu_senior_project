@@ -8,3 +8,4 @@
 /TestGmailServer/TestGmailServer/node_modules
 /TestGmailServer/TestGmailServer/package-lock.json
 /IntegrationServer/database.sqlite3
+/IntegrationServer/config.json
