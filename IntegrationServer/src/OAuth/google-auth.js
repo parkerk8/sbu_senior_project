@@ -17,7 +17,7 @@ const OAuth2Client = new google.auth.OAuth2(
 	  //"http://localhost:3000/tokenHandle") //backToUrl
 
 
-
+//Declares needed scopes
 const scopes = [
 	'https://www.googleapis.com/auth/contacts'
 	];
@@ -55,7 +55,11 @@ async function ReadContact(service, nxt_token = null) {
 	});
 }
 
-// funtion-total items?
+/**
+ * Uses the Google People API to get the total number of contacts in the user's account
+ * @param service - The Google API service object.
+ * @param callback - The function to call when the API call is complete.
+ */
 async function total_items(service, callback) {
 	service.people.connections.list({
 		resourceName: 'people/me',
@@ -74,6 +78,12 @@ async function total_items(service, callback) {
 
 
 //Pulls contact data
+/**
+ * Fetches the contacts from the Google API and returns the data to the callback function.
+ * @param service - The service object that you create in the previous step.
+ * @param page_token - The page token is used to get the next page of results.
+ * @param callback - This is the function that will be called when the data is returned.
+ */
 async function fetch_contact_data(service, page_token, callback) {
 	service.people.connections.list({
 		resourceName: 'people/me',
@@ -181,6 +191,10 @@ async function helpME (req, res, next){
 };
 
 
+
+ //If the token.json file exists, then read it and redirect to the page that called the function. 
+ //If the token.json file doesn't exist, then generate a url and redirect to it.
+ 
 function setUpOAuth (req, res) {
 	console.log(req.session.backToUrl);
 	console.log("Hello");
@@ -211,6 +225,10 @@ function setUpOAuth (req, res) {
 	return res.redirect(url);
 	}
 }
+
+
+// If the token doesn't exist, it creates a new token and stores it to disk. If the token does exist,
+// it sets up the OAuth2 client.
 
 function codeHanlde (req, res) {
 	//Creates a new token or detects if a token already exists

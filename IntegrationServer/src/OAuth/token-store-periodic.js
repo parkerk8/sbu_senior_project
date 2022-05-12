@@ -33,6 +33,9 @@ function useAccessToken() {
 
 
 
+
+// Checks if the token.json file exists, if it does, it reads the file and compares it to the
+// current credentials, if they are different, it writes the new credentials to the file.
 function updateToken(){
 	credentials = JSON.stringify(OAuth2Client.credentials)
 		

@@ -1,5 +1,7 @@
 const { ContactMapping } = require('../../db/models');
 
+
+// Takes an itemID as an argument, and returns the result of a query to the database.
 const getContactMapping = async (itemID) => {
   try {
     const queryResult = await ContactMapping.findByPk(itemID);

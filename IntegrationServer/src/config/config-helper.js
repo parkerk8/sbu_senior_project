@@ -7,6 +7,7 @@ var secondaryEmailID = ''
 var notesID = ''; */
 
 
+/* Creating a JSON object with the keys and values. */
 const configVariables = {
 	"workPhoneId": '',
 	"mobilePhoneID": '',
@@ -16,6 +17,11 @@ const configVariables = {
 	"createNewDatabase": true
 }
 
+/**
+ * Takes a JSON object as a parameter, and then it loops through the object and assigns the values
+ * of the object to variables.
+ * @param config - This is the config object that is passed in from the sync function.
+ */
 async function setConfigVariables (config){
 	let {columnIds, settings} = config;
 	
@@ -54,6 +60,7 @@ async function setConfigVariables (config){
 	}
 }
 
+/* Exporting the variables and functions to be used in other files. */
 module.exports = {
 	configVariables,
 	setConfigVariables
