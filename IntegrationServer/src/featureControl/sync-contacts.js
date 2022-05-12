@@ -235,11 +235,13 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 				}
 			}, async (err, res) => {
 				if (err) console.error('The API returned an error: ' + err);
+				else{
 				await contactMappingService.createContactMapping({
 					itemID,
 					resourceName: res.data.resourceName,
 					etag: res.data.etag
 				});
+				}
 			}
 			);
 			boardItemIndex++;
