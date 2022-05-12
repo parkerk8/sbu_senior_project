@@ -402,11 +402,13 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 					}
 				}, async (err, res) => {
 					if (err) console.error('The API returned an error: ' + err);
+					else{
 					await contactMappingService.createContactMapping({
 						itemID,
 						resourceName: res.data.resourceName,
 						etag: res.data.etag
 					});
+					}
 				}
 				);
 			}
@@ -439,7 +441,9 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 						} 
 					}, async (err, res) => { 
 							if (err) console.error('The API returned an error: ' + err);
-							await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});	
+							else{
+								await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});	
+							}
 						} 
 					);
 				});
