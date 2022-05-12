@@ -13,9 +13,6 @@ const configVariables = {
 	"primaryEmailID": '',
 	"secondaryEmailID": '',
 	"notesID": '',
-	"clientId": ' ',
-	"clientSecret": ' ',
-	"backToUrl": ' ',
 	"createNewDatabase": true
 }
 
@@ -46,18 +43,6 @@ async function setConfigVariables (config){
 			case process.env.NOTES_TITLE:
 				console.log(currentSection.id);
 				configVariables.notesID = currentSection.id;
-				break;
-			case process.env.MONDAY_CLIENT_ID:
-				console.log(currentSection.id);
-				configVariables.clientId = currentSection.id;
-				break;
-			case process.env.MONDAY_CLIENT_SECRET:
-				console.log(currentSection.id);
-				configVariables.clientSecret = currentSection.id;
-				break;
-			case process.env.BACK_TO_URL:
-				console.log(currentSection.id);
-				configVariables.backToUrl = currentSection.id;
 				break;
 			}
 		index++;
