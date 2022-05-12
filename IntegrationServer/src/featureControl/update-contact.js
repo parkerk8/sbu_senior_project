@@ -71,7 +71,6 @@ async function updateContactInfo(req, res){
 		try{
 			let {resourceName, etag} = await contactMappingService.getContactMapping(itemID);
 			let help = await update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, update);
-			console.log(help);
 		}
 		catch(err) {
 			console.log("Catch block err: " + err);

@@ -401,13 +401,13 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 						biographies: arrNotes,
 					}
 				}, async (err, res) => {
-					if (err) console.error('The API returned an error: ' + err);
+					if (err) console.error('The API returned an error: hi' + err);
 					else{
-					await contactMappingService.createContactMapping({
-						itemID,
-						resourceName: res.data.resourceName,
-						etag: res.data.etag
-					});
+						await contactMappingService.createContactMapping({
+							itemID,
+							resourceName: res.data.resourceName,
+							etag: res.data.etag
+						});
 					}
 				}
 				);
@@ -419,7 +419,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 					personFields: 'metadata',
 				}, async (err, res) => {
 					if(err) return console.error('The API returned an error: ' + err);
-					
+					else{
 					update = await contactMappingService.updateContactMapping(itemID, {resourceName: res.data.resourceName, etag: res.data.etag});
 					updatedMapping = itemMapping = await contactMappingService.getContactMapping(itemID);
 				
@@ -446,6 +446,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 							}
 						} 
 					);
+					}
 				});
 			}
 			boardItemIndex++;
