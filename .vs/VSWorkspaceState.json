@@ -3,13 +3,13 @@
     "",
     "\\IntegrationServer",
     "\\IntegrationServer\\src",
+    "\\IntegrationServer\\src\\config",
+    "\\IntegrationServer\\src\\db",
     "\\IntegrationServer\\src\\featureControl",
     "\\IntegrationServer\\src\\middleware",
     "\\IntegrationServer\\src\\OAuth",
-    "\\IntegrationServer\\src\\routes",
-    "\\TestGmailServer\\TestGmailServer",
-    "\\Trevor\\src"
+    "\\IntegrationServer\\src\\routes"
   ],
-  "SelectedNode": "\\IntegrationServer\\src\\OAuth\\google-auth.js",
+  "SelectedNode": "\\IntegrationServer\\src\\config\\config-helper.js",
   "PreviewInSolutionExplorer": false
 }

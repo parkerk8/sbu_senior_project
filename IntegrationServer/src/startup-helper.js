@@ -7,8 +7,7 @@ const {setConfigVariables} = require('./config/config-helper.js');
 const OAuth2Client = require('./OAuth/google-auth.js').OAuthClient
 
 
- // If the token.json file exists, read it and set the OAuth2Client.credentials to the contents of the file
-
+// If the token.json file exists, read it and set the OAuth2Client.credentials to the contents of the file
 async function setOAuthCredentials () {
 	if (fs.existsSync("./token.json")) {
 		await fs.readFile("./token.json", (err, token) => {
