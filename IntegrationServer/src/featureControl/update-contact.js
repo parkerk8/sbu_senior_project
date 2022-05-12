@@ -9,7 +9,7 @@ const contactMappingService = require('../services/database-services/contact-map
 let {configVariables} = require('../config/config-helper.js');
 
 /**
- * It takes the data from the webhook, formats it, and then sends it to the update function.
+ * Takes the data from the webhook, formats it, and then sends it to the update function.
  * @param req - The request object
  * @param res - the response object
  * @returns a promise.

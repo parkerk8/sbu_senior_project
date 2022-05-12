@@ -77,7 +77,7 @@ async function populateContacts(req, res)
 
 
 
- // Takes a list of contacts from a database, and creates a new database with the same contacts.
+// Takes a list of contacts from a database, and creates a new database with the same contacts.
 async function initalSetupGoogleContacts(boardItems){   //makes new database.
 	let boardItemIndex = 0;
 	let doConfig = true;
@@ -240,7 +240,6 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 
  // Takes in an array of objects, each object representing a row in the board, and updates the
  // contacts in the database with the information from the board
-
 async function syncWithExistingContacts(boardItems){   //updates existing database.
 	let boardItemIndex = 0;
 	let doConfig = true;
@@ -435,8 +434,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	return null;
 }
 
-
-// This function will wait for a specified amount of time before continuing with the next line of code.
+// Waits a specified amount of time before continuing
 function sleep(ms) {
 	console.log("Please wait warmly, APIs are resting");
 	return new Promise((resolve) => {
