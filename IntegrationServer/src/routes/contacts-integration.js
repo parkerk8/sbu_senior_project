@@ -15,7 +15,7 @@ router.post('/update', authenticationMiddleware, updateContact);
 
 
 
-router.post('/populate', authenticationMiddleware, populateContacts);
+router.post('/sync', authenticationMiddleware, populateContacts);
 
 
 
