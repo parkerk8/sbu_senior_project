@@ -8,6 +8,12 @@ const contactMappingService = require('../services/database-services/contact-map
 
 let {configVariables} = require('../config/config-helper.js');
 
+/**
+ * It takes the data from the webhook, formats it, and then sends it to the update function.
+ * @param req - The request object
+ * @param res - the response object
+ * @returns a promise.
+ */
 async function updateContactInfo(req, res){
 	//puts monday.com data into one place
 	console.log(" ");
@@ -85,6 +91,20 @@ async function updateContactInfo(req, res){
 }
 
 
+/**
+ * Takes in a bunch of parameters, and then it calls the Google People API to update a contact.
+ * @param resourceName - The resource name of the contact to update.
+ * @param etag - The etag of the contact.
+ * @param itemID - The ID of the contact in the database
+ * @param nameArr - an array of strings, where the first element is the first name, the second element
+ * is the middle name, and the third element is the last name.
+ * @param primaryEmail - the primary email address of the contact
+ * @param secondaryEmail - "test@test.com"
+ * @param workPhone - +1-555-555-5555
+ * @param mobilePhone - +1-555-555-5555
+ * @param notes - a string
+ * @param [callback] - a function that will be called if the update fails.
+ */
 async function update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, callback = undefined){
 	await service.people.updateContact({
 				resourceName: resourceName,

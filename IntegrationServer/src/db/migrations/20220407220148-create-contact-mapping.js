@@ -1,4 +1,5 @@
 'use strict';
+//Creates a table in the database. 
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('ContactMappings', {

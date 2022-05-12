@@ -10,6 +10,8 @@ google.options({auth: OAuth2Client});
 schedule.scheduleJob('0 * * * *', useAccessToken); 
 
 
+ // Sends a blank request to the google API, which updates the access token, and prevents it from
+ // expiring in the event the API is not used for weeks on end.
 function useAccessToken() {
 	if(!(Object.keys(OAuth2Client.credentials).length === 0))//prevent it from running if no credentials are set
 	{
@@ -32,6 +34,10 @@ function useAccessToken() {
 }
 
 
+
+
+ // Checks if the token.json file exists, if it does, it reads the file and compares it to the
+ // current credentials, if they are different, it writes the new credentials to the file.
 
 function updateToken(){
 	credentials = JSON.stringify(OAuth2Client.credentials)

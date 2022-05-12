@@ -55,7 +55,12 @@ async function ReadContact(service, nxt_token = null) {
 	});
 }
 
-// funtion-total items?
+/**
+ * Takes a Google API service object and a callback function as parameters, and then calls the
+ * Google API to get the total number of connections for the current user
+ * @param service - The authorized API client.
+ * @param callback - A function that will be called when the API call is complete.
+ */
 async function total_items(service, callback) {
 	service.people.connections.list({
 		resourceName: 'people/me',

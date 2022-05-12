@@ -7,6 +7,7 @@ var secondaryEmailID = ''
 var notesID = ''; */
 
 
+/* Creates an object with the keys and values. */
 const configVariables = {
 	"workPhoneId": '',
 	"mobilePhoneID": '',
@@ -16,6 +17,10 @@ const configVariables = {
 	"createNewDatabase": true
 }
 
+/**
+ * Takes a JSON object as a parameter, and then it loops through the object and assigns the values
+ * of the object to variables.
+*/
 async function setConfigVariables (config){
 	let {columnIds, settings} = config;
 	

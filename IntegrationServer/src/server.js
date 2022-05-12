@@ -17,7 +17,7 @@ require('./OAuth/token-store-periodic.js');
 //get the createTunnel function for use in, you quessed it, creating a tunnel. 
 
 const port = process.env.PORT;
-//get the prot from the .evn file
+//get the port from the .evn file
 
 
 app.use(bodyParser.json()) //this is so we can deal with JSON info in POST requests
