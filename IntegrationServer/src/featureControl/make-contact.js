@@ -112,7 +112,7 @@ async function makeNewContact(req, res){
 				],
 		}
 	}, async (err, res) => { 
-			if (err) return console.error('The API returned an error: ' + err)	
+			if (err) return console.error('The API returned an error: ' + err)				
 			await contactMappingService.createContactMapping({
 				itemID,
 				resourceName: res.data.resourceName, 
