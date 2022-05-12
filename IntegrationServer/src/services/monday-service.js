@@ -1,5 +1,15 @@
 const initMondayClient = require('monday-sdk-js');
 
+/**
+ * It takes a token and a boardId as parameters, and returns the items on the board.
+ * @param token - The token you get from the OAuth flow
+ * @param boardId - The ID of the board you want to get items from.
+ * @returns [ { name: 'Test',
+ *     updated_at: '2019-10-29T15:00:00.000Z',
+ *     column_values: [ [Object], [Object], [Object], [Object], [Object] ] },
+ *   { name: 'Test',
+ *     updated_at: '2019-10-29T15:00:
+ */
 const getBoardItems = async (token, boardId) => {
   try {
     const mondayClient = initMondayClient();

@@ -2,6 +2,7 @@ const {google} = require('googleapis');
 const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
+/* Importing the configVariables from the config-helper.js file. */
 const service = google.people( {version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
@@ -16,11 +17,17 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
 
 
 var populateLock = true; 
-//Monday will send a duplicate request if it doesn't get a responce in 30 seconds.
+//Monday will send a duplicate request if it doesn't get a response in 30 seconds.
 //This is very much an issue with the populate function, which takes far longer than that to execute.
 //Since we can assume it takes at least seconds for 
 
 
+/**
+ * It takes the board items from the board that the user selected, and then it either creates a new
+ * database of contacts or syncs with an existing database of contacts
+ * @param req - The request object
+ * @param res - The response object
+ */
 async function populateContacts(req, res)
 {
 	const boardItems = await getBoardItems(req.session.shortLivedToken, req.body.payload.inputFields.boardID)
@@ -76,6 +83,11 @@ async function populateContacts(req, res)
 //Query for etag on update fail.
 
 
+/**
+ * It takes a list of contacts from a database, and creates a new database with the same contacts.
+ * @param boardItems - an array of objects that contain the information for each contact.
+ * @returns null.
+ */
 async function initalSetupGoogleContacts(boardItems){   //makes new database.
 	let boardItemIndex = 0;
 	let doConfig = true;
@@ -235,6 +247,12 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 	return null;
 }
 
+/**
+ * Takes in an array of objects, each object representing a row in the board, and updates the
+ * contacts in the database with the information contained in the board
+ * @param boardItems - An array of objects that contain the data from the board.
+ * @returns null.
+ */
 async function syncWithExistingContacts(boardItems){   //updates existing database.
 	let boardItemIndex = 0;
 	let doConfig = true;
@@ -429,6 +447,11 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	return null;
 }
 
+/**
+ * This function will wait for a specified amount of time before continuing with the next line of code.
+ * @param ms - The number of milliseconds to wait before resolving the promise.
+ * @returns A promise object.
+ */
 function sleep(ms) {
 	console.log("Please wait warmly, APIs are resting");
 	return new Promise((resolve) => {

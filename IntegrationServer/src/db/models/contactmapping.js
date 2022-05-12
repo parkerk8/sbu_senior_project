@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   ContactMapping.init({
-    resourceName: DataTypes.STRING, //itemID feild not needed in Model. id feild is automattically added, and we'll be using that.
+    resourceName: DataTypes.STRING, //itemID field not needed in Model. id field is automattically added, and we'll be using that.
     etag: DataTypes.STRING
   }, {
     sequelize,

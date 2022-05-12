@@ -17,7 +17,7 @@ const OAuth2Client = new google.auth.OAuth2(
 	  //"http://localhost:3000/tokenHandle") //backToUrl
 
 
-
+// Declares the necessary scopes from Google
 const scopes = [
 	'https://www.googleapis.com/auth/contacts'
 	];
@@ -105,6 +105,13 @@ async function helpME (req, res, next){
 };
 
 
+/**
+ * If the token.json file exists, then read it and redirect to the page that called the function. 
+ * If the token.json file doesn't exist, then generate a url and redirect to it.
+ * @param req - The request object.
+ * @param res - The response object.
+ * @returns The URL to the Google OAuth2 page.
+ */
 function setUpOAuth (req, res) {
 	console.log(req.session.backToUrl);
 	console.log("Hello");
