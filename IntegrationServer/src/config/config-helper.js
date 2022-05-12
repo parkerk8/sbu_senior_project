@@ -1,10 +1,5 @@
 const fs = require('fs');
-/*
-var workPhoneId = '';
-var mobilePhoneID = '';
-var primaryEmailID = '';
-var secondaryEmailID = ''
-var notesID = ''; */
+
 
 
 /* Creating a JSON object with the keys and values. */
@@ -20,7 +15,7 @@ const configVariables = {
 /**
  * Takes a JSON object as a parameter, and then it loops through the object and assigns the values
  * of the object to variables.
- * @param config - This is the config object that is passed in from the sync function.
+ * @param config - A json object containing values to be set for the config variables.
  */
 async function setConfigVariables (config){
 	let {columnIds, settings} = config;

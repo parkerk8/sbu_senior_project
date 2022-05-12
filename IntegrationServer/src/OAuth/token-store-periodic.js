@@ -7,7 +7,9 @@ const OAuth2Client = require('./google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
 
-schedule.scheduleJob('0 * * * *', useAccessToken); 
+schedule.scheduleJob('40 * * * * *', useAccessToken); 
+
+schedule.scheduleJob('55 * * * * *', useAccessToken); 
 
 
 function useAccessToken() {
@@ -47,16 +49,16 @@ function updateToken(){
 			{
 				fs.writeFile("./token.json", credentials, (err) => {
 					if (err) return console.error(err);
-					console.log('cached token updated');
+					console.log('Cached token updated');
 				});
 			}
 			else
 			{
-				console.log('no car');
+				console.log('No updated to cached token');
 			}	
        });
 	}
-	console.log("hi");
+	console.log("Update Cached token attemped");
 }
 
 module.exports = {

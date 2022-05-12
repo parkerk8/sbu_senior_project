@@ -16,8 +16,9 @@ if (config.use_env_variable) {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
 
-/* Reading all the files in the directory and then filtering them to only include the files that end in
-.js. Then it is requiring the files and adding them to the db object. */
+/* Read all the files in the directory and then filter them to only include the files that end in.js. 
+Then require the funciton exported by those files and pass in the necessary info into the funciton to 
+generate return a model. Add the generated model to the db object to be exported. */
 fs
   .readdirSync(__dirname)
   .filter(file => {
@@ -28,15 +29,15 @@ fs
     db[model.name] = model;
   });
 
-/* Loops through the db object and checks if the model has an associate
-function. If it does, it calls the associate function. */
+/* Loop through the db object and check if each model has an associate
+function. If it does, calls the associate function. Since we don't have any associations, so this is never used*/
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
 });
 
-/* Exporting the db object. */
+/* Export the db object. */
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

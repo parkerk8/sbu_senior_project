@@ -15,11 +15,7 @@ let {configVariables} = require('../config/config-helper.js');
  * @returns a promise.
  */
 async function updateContactInfo(req, res){
-	//puts monday.com data into one place
-	console.log(" ");
-	await console.log(Date.now());
 
-		
 	let itemMap = req.body.payload.inboundFieldValues.itemMapping
 	let changedCollumnId = req.body.payload.inboundFieldValues.columnId
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
@@ -43,7 +39,6 @@ async function updateContactInfo(req, res){
 	
 	
 		//Try to format moble and work phones 
-		//TO DO: Add a way for extentions column to be included. Will probably just need a check for it's existance. 
 		if(workPhone != undefined)
 		{
 			console.log(workPhone);
@@ -165,8 +160,6 @@ async function update(resourceName, etag, itemID, nameArr, primaryEmail, seconda
 				else
 				{
 					await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});
-					console.log("done");
-					console.log(Date.now());
 				}
 			} 
 		);
