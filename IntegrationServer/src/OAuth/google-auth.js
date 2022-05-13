@@ -59,7 +59,7 @@ function setUpOAuth (req, res) {
 	}
 }
 
-function codeHanlde (req, res) {
+function codeHandle (req, res) {
 	//Creates a new token or detects if a token already exists
 	backToUrl = myCache.get("returnURl");
 	if(backToUrl == undefined) return res.status(200).send({});
@@ -95,7 +95,7 @@ function codeHanlde (req, res) {
 }
 
 module.exports = {
-	codeHanlde,
+	codeHandle,
 	setUpOAuth,
 	'OAuthClient': OAuth2Client
 };
