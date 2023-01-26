@@ -20,6 +20,7 @@ require('./OAuth/token-store-periodic.js');
 
 
 const port = process.env.PORT;
+console.log(process.env.PORT);
 
 
 app.use(bodyParser.json())

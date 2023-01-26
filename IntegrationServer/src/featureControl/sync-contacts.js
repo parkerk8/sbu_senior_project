@@ -17,7 +17,7 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
 
 
 
-var populateLock = true; 
+var populateLock = true;
 //Monday will send a duplicate request if it doesn't get a response in 30 seconds.
 //This is very much an issue with the populate function, which takes far longer than that to execute.
 //This lock varibale is used to prevent multiple sync requests happening simultaniusly 
