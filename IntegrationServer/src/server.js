@@ -9,7 +9,6 @@ const routes = require('./routes');
 
 
 //load in needed funcitons
-const {createTunnel} = require('./tunnelHelper/tunnel');
 const {setOAuthCredentials} = require('./startup-helper.js');
 const {loadConfigVariables} = require('./startup-helper.js');											   
 
@@ -44,7 +43,7 @@ app.use(routes); //Tells the App to mount the paths contained in the router obje
 
 //Tell the app to listen at port, and then create a tunnel.
 app.listen(port, () => {
-  createTunnel(port);
+  (`Listening on port: ${port}`);
 });
 
 
