@@ -15,12 +15,7 @@ const {loadConfigVariables} = require('./startup-helper.js');
 //require file to make it's code run upon startup.
 require('./OAuth/token-store-periodic.js');
 
-
-
-
-const port = process.env.PORT;
-console.log(process.env.PORT);
-
+const { PORT: port } = process.env;
 
 app.use(bodyParser.json())
 //This will act as middleware that all requests will get filtered through
