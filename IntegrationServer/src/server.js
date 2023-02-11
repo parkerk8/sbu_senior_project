@@ -9,19 +9,13 @@ const routes = require('./routes');
 
 
 //load in needed funcitons
-const {createTunnel} = require('./tunnelHelper/tunnel');
 const {setOAuthCredentials} = require('./startup-helper.js');
 const {loadConfigVariables} = require('./startup-helper.js');											   
 
 //require file to make it's code run upon startup.
 require('./OAuth/token-store-periodic.js');
 
-
-
-
-const port = process.env.PORT;
-console.log(process.env.PORT);
-
+const { PORT: port } = process.env;
 
 app.use(bodyParser.json())
 //This will act as middleware that all requests will get filtered through
@@ -44,7 +38,7 @@ app.use(routes); //Tells the App to mount the paths contained in the router obje
 
 //Tell the app to listen at port, and then create a tunnel.
 app.listen(port, () => {
-  createTunnel(port);
+  (`Listening on port: ${port}`);
 });
 
 
