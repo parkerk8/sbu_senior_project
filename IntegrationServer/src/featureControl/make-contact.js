@@ -8,9 +8,10 @@ const contactMappingService = require('../services/database-services/contact-map
 
 var {configVariables} = require('../config/config-helper.js');
 
- 
+ console.log("I made it to make-contact.js");
 async function makeNewContact(req, res){
 	//gets the contact info from monday.com
+  console.log("I made it to make-contact.js");
 	let itemMap = req.body.payload.inboundFieldValues.itemMapping
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
 	
