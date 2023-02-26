@@ -7,8 +7,7 @@ const OAuth2Client = require('./google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
 
-schedule.scheduleJob('0 * * * *', useAccessToken); 
-
+schedule.scheduleJob('0 * * * *', useAccessToken); //Schedules useAccessToken to run every ???
 
 
 function useAccessToken() {

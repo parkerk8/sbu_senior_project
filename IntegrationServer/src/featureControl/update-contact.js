@@ -17,9 +17,12 @@ let {configVariables} = require('../config/config-helper.js');
 async function updateContactInfo(req, res){
 
 	let itemMap = req.body.payload.inboundFieldValues.itemMapping
-	let changedCollumnId = req.body.payload.inboundFieldValues.columnId
+	let changedColumnId = req.body.payload.inboundFieldValues.columnId
 	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
-	if(changedCollumnId == configVariables.primaryEmailID ||changedCollumnId == configVariables.secondaryEmailID || changedCollumnId == configVariables.workPhoneId || changedCollumnId == configVariables.mobilePhoneID ||changedCollumnId == configVariables.notesID)
+
+	console.log(JSON.stringify(req.body.payload.inboundFieldValues));
+
+	if(changedColumnId == configVariables.primaryEmailID || changedColumnId == configVariables.secondaryEmailID || changedColumnId == configVariables.workPhoneId || changedColumnId == configVariables.mobilePhoneID || changedColumnId == configVariables.notesID)
 	{
 		let name = itemMap.name
 		let primaryEmail = itemMap[configVariables.primaryEmailID];
@@ -76,9 +79,7 @@ async function updateContactInfo(req, res){
 			console.log("Catch block err: " + err);
 		}
 		return res.status(200).send({});
-	}
-	else
-	{
+	} else {
 		console.log("no change");
 		return res.status(200).send({});
 	}
