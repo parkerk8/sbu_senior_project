@@ -11,8 +11,8 @@ schedule.scheduleJob('0 * * * *', useAccessToken); //Schedules useAccessToken to
 
 
 function useAccessToken() {
-	if(!(Object.keys(OAuth2Client.credentials).length === 0))//prevent it from running if no credentials are set
-	{
+  //Prevent integrations from running if no credentials are set
+	if(!(Object.keys(OAuth2Client.credentials).length === 0)) {
 		//Send a blank request to google APi, this will update the access token, and prevent it from expiring in the event the API is not used for weeks on end.
 		var service = google.people({ version: 'v1', auth: OAuth2Client });
 		service.people.connections.list({
@@ -22,11 +22,8 @@ function useAccessToken() {
 		}, (err, res) => { 
 			if (err) return console.error('The API returned an error: ' + err)
 			updateToken()
-		}
-		);
-	}
-	else
-	{
+		});
+	}	else {
 		console.log('No credentials set for access token update');
 	}
 }
@@ -39,22 +36,19 @@ function useAccessToken() {
 function updateToken(){
 	credentials = JSON.stringify(OAuth2Client.credentials)
 		
-	if(fs.existsSync("./token.json"))
-	{
+	if(fs.existsSync("./token.json")) {
 		fs.readFile("./token.json", (err, token) => {
 			if (err) return console.error(err);
-			if(!(token == credentials))
-			{
+			if(!(token == credentials)) {
 				fs.writeFile("./token.json", credentials, (err) => {
 					if (err) return console.error(err);
 					console.log('Cached token updated');
 				});
 			}
-			else
-			{
+			else {
 				console.log('No updated to cached token');
 			}	
-       });
+    });
 	}
 	console.log("Update Cached token attemped");
 }

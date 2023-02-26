@@ -1,49 +1,44 @@
 const {google} = require('googleapis');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 const {setConfigVariables} = require('./config/config-helper.js');
 
+const OAuth2Client = require('./OAuth/google-auth.js').OAuthClient;
 
-const OAuth2Client = require('./OAuth/google-auth.js').OAuthClient
+console.log("I made it to startup-helper.js");
 
-
-//if the OAuth token.json file exists, read it and set the OAuth2Client.credentials to the contents of the file
-//if the OAuth token.json file does not exist, do nothing.
 async function setOAuthCredentials () {
-	if (fs.existsSync("./token.json")) {
-		await fs.readFile("./token.json", (err, token) => {
-            OAuth2Client.credentials = JSON.parse(token);
-			console.log("OAuth Credentials Set");
-		});
-	} else { //No token.json found
-		console.log("No token found");
-	}
+  console.log("I made it to setUpOAuthCreds in startup-helper.js");
+  try {
+    const token = await fs.readFile("./token.json");
+    OAuth2Client.credentials = JSON.parse(token);
+    console.log("OAuth Credentials Set");
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log("No token found");
+    } else {
+      console.error("Error reading token file: ", err);
+    }
+  }
 }
 
-
-//if the config.json file exists, read it and sent the contents to be loaded for the API to use.
-//if config.json does not exist, do nothing.
 async function loadConfigVariables () {
-	if (fs.existsSync("./config.json")) {
-		await fs.readFile("./config.json", async (err, config) => {
-			try{	
-				console.log("loading config");
-				config = JSON.parse(config)
-				await setConfigVariables(config);
-				console.log("configs loaded");
-			}
-			catch{
-				console.error("Invalid or corrupt config.json file");
-			}
-		});
-	} else { //No token.json found
-		console.log("No config found");
-	}
-}
+  console.log("I made it to loadConfigVariables in startup-helper.js");
+  try {
+    const config = await fs.readFile("./config.json");
+    console.log("loading config");
+    const parsedConfig = JSON.parse(config);
+    await setConfigVariables(parsedConfig);
+    console.log("configs loaded");
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log("No config found");
+    } else {
+      console.error("Error reading config file: ", err);
+    }
+  }
 
-
-module.exports = 
-{
-	loadConfigVariables,
-	setOAuthCredentials,
+module.exports = {
+  loadConfigVariables,
+  setOAuthCredentials,
 };
