@@ -37,7 +37,6 @@ async function loadConfigVariables () {
       console.error("Error reading config file: ", err);
     }
   }
-}
 
 module.exports = {
   loadConfigVariables,
