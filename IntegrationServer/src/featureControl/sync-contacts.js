@@ -29,34 +29,35 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
  * @param res - The response object
  */
 async function populateContacts(req, res) {
-  console.log("I made it to populateContacts");
+  const { shortLivedToken } = req.session;
+  const { boardID } = req.body.payload.inputFields;
+  const { createNewDatabase } = configVariables;
 
+  let release = null;
   try {
-    const boardItems = await getBoardItems(req.session.shortLivedToken, req.body.payload.inputFields.boardID);
-    let {createNewDatabase} = configVariables;
-    console.log("Create new database = " + createNewDatabase);
-    
-    let release = await populateLock.acquire(); // acquire the lock
-    try {
-      if(createNewDatabase === true) {
+    const boardItems = await getBoardItems(shortLivedToken, boardID);
+    release = await populateLock.acquire();
+
+    switch (createNewDatabase) {
+      case true:
         await createNewContactsDatabase(boardItems);
-      }
-      else if(createNewDatabase === false) {
+        break;
+      case false:
         await syncExistingContactsDatabase(boardItems);
-      }
-      else {
+        break;
+      default:
         console.error("Error, config variables corrupt");
         return res.status(500).json({ error: 'Internal Server Error' });
-      }
-    } finally {
-      populateLock.release(release); // release the lock
     }
 
-    console.log("Sync finished");
     return res.status(200).send({});
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Internal Server Error' });
+  } finally {
+    if (release) {
+      populateLock.release(release);
+    }
   }
 }
 
