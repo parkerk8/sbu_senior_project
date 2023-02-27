@@ -38,8 +38,8 @@ async function setUpOAuth (req, res) {
 	  const TOKEN_PATH = "./token.json"
     fs.readFile("./token.json", (err, token) => {
         if (err) {
-				    console.error(err);
-				    return;
+            console.error(`Error reading token file: ${err}`);
+				    return res.status(500).send({});
 			  }
         OAuth2Client.credentials = JSON.parse(token);;
 			  let returnUrl = req.session.backToUrl;
