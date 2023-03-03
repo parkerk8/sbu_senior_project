@@ -40,10 +40,10 @@ async function populateContacts(req, res) {
 
     switch (createNewDatabase) {
       case true:
-        await createNewContactsDatabase(boardItems);
+        await initalSetupGoogleContacts(boardItems);
         break;
       case false:
-        await syncExistingContactsDatabase(boardItems);
+        await syncWithExistingContacts(boardItems);
         break;
       default:
         console.error("Error, config variables corrupt");
@@ -97,7 +97,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 		if(doConfig)
 		{
 			let columnIdConfig = [];
-			if (!(fs.existsSync("./config.json"))) 
+			if (!(fs.existsSync("./config.json")))
 			{
 				while(columnValuesIndex < currentItem.column_values.length) {
 					let currentColumn = currentItem.column_values[columnValuesIndex]
