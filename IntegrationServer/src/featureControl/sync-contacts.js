@@ -36,14 +36,14 @@ async function populateContacts(req, res) {
   let release = null;
   try {
     const boardItems = await getBoardItems(shortLivedToken, boardID);
-    release = await populateLock.acquire();
+    release = await populateLock.acquire(); //Mutex lock - prevents sync from triggering again if already running.
 
     switch (createNewDatabase) {
       case true:
-        await initalSetupGoogleContacts(boardItems);
+        await initalSetupGoogleContacts(boardItems); // Create a NEW database (contacts)
         break;
       case false:
-        await syncWithExistingContacts(boardItems);
+        await syncWithExistingContacts(boardItems); // Update EXISTING database (contacts)
         break;
       default:
         console.error("Error, config variables corrupt");
