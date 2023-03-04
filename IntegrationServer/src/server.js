@@ -28,7 +28,8 @@ app.use(routes); //Tells the app to mount the paths contained in the router obje
 
 const { PORT: port } = process.env; //get port number from environment file.
 
-if(process.env.Run == "Dev") { //custom tunnel - currently set for loca.lt (localTunnel; not actually local). Loca.lt is NOT reliable for sub-domain.
+const run = process.env.RUN; //determine which tunnel to run
+if(run == "Dev") { //custom tunnel - currently set for loca.lt (localTunnel; not actually local). Loca.lt is NOT reliable for sub-domain.
   const {createTunnel} = require('./tunnelHelper/tunnel'); //requires tunnel.js system file's createTunnel function for tunnel creation
   
   app.listen(port, () => {

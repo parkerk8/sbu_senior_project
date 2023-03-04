@@ -32,8 +32,8 @@
 		"server": "nodemon ./src/server.js",
 		"db:migrate": "sequelize db:migrate",
 		"stop": "kill-port 3000",
-    "test": "jest",
-    "debug": "node --inspect src/server.js"
+		"test": "jest",
+		"debug": "node --inspect src/server.js"
 	},
 	"nodemonConfig": {
 		"watch": [
