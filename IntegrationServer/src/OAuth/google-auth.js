@@ -34,19 +34,18 @@ google.options({auth: OAuth2Client});
  */
 async function setUpOAuth (req, res) {	
   console.log("I made it to setUpOauth.js");
-	if (fs.existsSync("./token.json")) {
-	  const TOKEN_PATH = "./token.json"
-    fs.readFile("./token.json", (err, token) => {
-        if (err) {
-            console.error(`Error reading token file: ${err}`);
-				    return res.status(500).send({});
-			  }
-        OAuth2Client.credentials = JSON.parse(token);;
-			  let returnUrl = req.session.backToUrl;
-			  return res.redirect(returnUrl);
-    });
-	} else {
-	    myCache.set("returnURl", req.session.backToUrl);
+	try {
+    const token = await fs.readFile("./token.json");
+    OAuth2Client.credentials = JSON.parse(token);
+		let returnUrl = req.session.backToUrl;
+		return res.redirect(returnUrl);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.error("Error reading token file: ", err);
+      return res.status(500).send({});
+    } else {   
+      console.log("No token found");
+      myCache.set("returnURl", req.session.backToUrl);
 	    let url = OAuth2Client.generateAuthUrl({
           // 'online' (default) or 'offline' (gets       refresh_token)
 		      access_type: 'offline',
@@ -54,43 +53,44 @@ async function setUpOAuth (req, res) {
 		      scope: SCOPES	
 	    });
 	    return res.redirect(url);
-	  }
+    }
   }
+}
 
 async function codeHandle (req, res) {
 	//Creates a new token or detects if a token already exists
   console.log("I made it to token-store-permissions.js");
 	backToUrl = myCache.get("returnURl");
-	if(backToUrl == undefined) 
+	if(backToUrl == undefined) {
       return res.status(200).send({});
-	else {
-	    myCache.del("returnURl");	
-      if (!(fs.existsSync("./token.json"))) {
-            const TOKEN_PATH = "./token.json"
-            const code = req.query['code'];
-            console.log(code);
- 
-            OAuth2Client.getToken(code, (err, token) => {
-            if (err) 
-              return console.error('Error retrieving access token', err);
-            OAuth2Client.credentials = token;
-            console.log(token);
-            fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                if (err) return console.error(err);
-                console.log('Token stored to', TOKEN_PATH);
-            });
-            //Store the token to disk for later program executions
-        });
-        return res.redirect(backToUrl);
-    }
+  } else {
+    myCache.del("returnURl");	
+    if (!(fs.existsSync("./token.json"))) {
+      const TOKEN_PATH = "./token.json"
+      const code = req.query['code'];
+      console.log(code);
+
+      OAuth2Client.getToken(code, (err, token) => {
+      if (err) 
+        return console.error('Error retrieving access token', err);
+      OAuth2Client.credentials = token;
+      console.log(token);
+      fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+          if (err) return console.error(err);
+          console.log('Token stored to', TOKEN_PATH);
+      });
+      //Store the token to disk for later program executions
+      });
+      return res.redirect(backToUrl);
+      
     //If the token exists, sets up OAuth2 client
-    else {
-       const TOKEN_PATH = "./token.json"
-        fs.readFile("./token.json", (err, token) => {
-            if (err) return console.error(err);
-            OAuth2Client.credentials = JSON.parse(token);
-        });
-        return res.redirect(backToUrl);
+    } else {
+     const TOKEN_PATH = "./token.json"
+      fs.readFile("./token.json", (err, token) => {
+          if (err) return console.error(err);
+          OAuth2Client.credentials = JSON.parse(token);
+      });
+      return res.redirect(backToUrl);
     }
 	}
 }
