@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  ContactMapping.init({
+  ContactMapping.init({ // Initialize ContactMapping to define database fields - see above.
     resourceName: DataTypes.STRING, //itemID field not needed in Model. id field is automattically added, and we'll be using that.
     etag: DataTypes.STRING
   }, {

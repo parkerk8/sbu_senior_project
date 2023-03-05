@@ -13,7 +13,7 @@ const {getBoardItems} = require('../services/monday-service.js');
 const fs = require('fs');
 
 /* Import the configVariables from the config-helper.js file. */
-var {configVariables} = require('../config/config-helper.js');
+var {configVariables} = require('../config/config-helper.js'); // List of IDs for the various titles being looked at on Monday.com
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables;
 
 
