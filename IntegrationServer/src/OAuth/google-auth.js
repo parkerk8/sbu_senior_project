@@ -65,32 +65,32 @@ async function codeHandle (req, res) {
       return res.status(200).send({});
   } else {
     myCache.del("returnURl");	
-    if (!(fs.existsSync("./token.json"))) {
-      const TOKEN_PATH = "./token.json"
-      const code = req.query['code'];
-      console.log(code);
-
-      OAuth2Client.getToken(code, (err, token) => {
-      if (err) 
-        return console.error('Error retrieving access token', err);
-      OAuth2Client.credentials = token;
-      console.log(token);
-      fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-          if (err) return console.error(err);
-          console.log('Token stored to', TOKEN_PATH);
-      });
-      //Store the token to disk for later program executions
-      });
+    try {
+      const TOKEN_PATH = await fs.readFile("./token.json");
+      OAuth2Client.credentials = JSON.parse(token);
       return res.redirect(backToUrl);
-      
-    //If the token exists, sets up OAuth2 client
-    } else {
-     const TOKEN_PATH = "./token.json"
-      fs.readFile("./token.json", (err, token) => {
-          if (err) return console.error(err);
-          OAuth2Client.credentials = JSON.parse(token);
-      });
-      return res.redirect(backToUrl);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        console.error("Error reading token file: ", err);
+      } else {
+        const TOKEN_PATH = "./token.json"
+        const code = req.query['code'];
+        console.log(code);
+    
+        OAuth2Client.getToken(code, (err, token) => {
+        if (err) 
+          return console.error('Error retrieving access token', err);
+        OAuth2Client.credentials = token;
+        console.log(token);
+        fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+            if (err) return console.error(err);
+            console.log('Token stored to', TOKEN_PATH);
+        });
+        //Store the token to disk for later program executions
+        });
+        return res.redirect(backToUrl);
+      }
+    
     }
 	}
 }
