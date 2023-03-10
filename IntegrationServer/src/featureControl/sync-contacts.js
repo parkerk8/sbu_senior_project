@@ -91,36 +91,20 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			await sleep(20000);
 		}
 
-		let columnValuesIndex = 0, currentItem = boardItems[boardItemIndex], name = currentItem.name; 
-    let arrName = name.split(" ", 2), arrEmails = [], arrPhoneNumber = [], arrNotes = [], itemID = '';
+		let columnValuesIndex = 0, 
+        currentItem = boardItems[boardItemIndex], 
+        name = currentItem.name, 
+        arrName = name.split(" ", 2), 
+        arrEmails = [], 
+        arrPhoneNumber = [], 
+        arrNotes = [], itemID = '';
 		
 		if(doConfig)
 		{
 			let columnIdConfig = [];
 			if (!(fs.existsSync("./config.json")))
 			{
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-					
-					if (boardItemIndex == 0 && 
-              (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-               process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-               process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-               process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-               process.env.NOTES_TITLE === currentColumn.title)) {
-						
-              const obj = {
-                 id: columnId,
-                 title: currentColumn.title
-              };
-						
-						  columnIdConfig.push(obj);
-						  console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
-        
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
 				const config = {
           "columnIds" : columnIdConfig,
 					"settings": {
@@ -137,28 +121,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
         
 				let config = await fs.readFileSync("./config.json");
 				config = await JSON.parse(config); 
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-				
-					if (boardItemIndex == 0 && 
-              (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-               process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-               process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-               process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-               process.env.NOTES_TITLE === currentColumn.title)) {
-            
-						const obj = {
-              id: columnId,
-							title : currentColumn.title
-            };
-							
-						columnIdConfig.push(obj);				
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
-				
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
 				config.columnIds = columnIdConfig;
 				config.settings.createNewDatabase = false;
 				
@@ -223,27 +186,8 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 		if(doConfig == true) {
 			let columnIdConfig = [];
 			if (!(fs.existsSync("./config.json"))) {
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-					
-					if(boardItemIndex == 0 && 
-             (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-              process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-              process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-              process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-              process.env.NOTES_TITLE === currentColumn.title)) {
-            
-						const obj = {
-							id: columnId,
-							title: currentColumn.title
-						};
-						
-						columnIdConfig.push(obj);
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
+        
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
 				let config = {"columnIds" : columnIdConfig,
 					"settings":
 						{
@@ -256,42 +200,27 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
             console.log('config stored to ./config.json');
 				});
       } else {
-				let config = await fs.readFileSync("./config.json");
-				config = await JSON.parse(config); 
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
+				  let config = await fs.readFileSync("./config.json");
+				  config = await JSON.parse(config); 
+        
+				  columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
 				
-					if(boardItemIndex == 0 && 
-             (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-              process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-              process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-              process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-              process.env.NOTES_TITLE === currentColumn.title)) {
-						const obj = {id: columnId,
-								title : currentColumn.title};
-							
-						columnIdConfig.push(obj);				
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
+				  config.columnIds = columnIdConfig;
+				  config.settings.createNewDatabase = false;
 				
-				config.columnIds = columnIdConfig;
-				config.settings.createNewDatabase = false;
-				
-				await setConfigVariables(config)
+				  await setConfigVariables(config)
 	
-				fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-            if (err) return err;
-            console.log('config.json updated');
-				});
+          fs.writeFile("./config.json", JSON.stringify(config), (err) => {
+              if (err) return err;
+              console.log('config.json updated');
+          });
 			}
 			doConfig = false;
 		} else {
+      
 			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
-			
 			itemMapping = await contactMappingService.getContactMapping(itemID);
+      
 			if(itemMapping == null) {
 				await service.people.createContact({
 					requestBody: {
@@ -356,6 +285,40 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	}
 	return null;
 }
+
+
+
+
+
+
+//FUNCTIONS GO HERE
+function getColumnIdConfig(currentItem, columnIdConfig) {
+  const validTitles = [
+    process.env.WORK_PHONE_TITLE,
+    process.env.MOBILE_PHONE_TITLE,
+    process.env.EMAIL_PRIMARY_TITLE,
+    process.env.EMAIL_SECONDARY_TITLE,
+    process.env.NOTES_TITLE
+  ];
+
+  for (let i = 0; i < currentItem.column_values.length; i++) {
+    let currentColumn = currentItem.column_values[i];
+    let columnId = currentColumn.id;
+
+    if (boardItemIndex == 0 && validTitles.includes(currentColumn.title)) {
+      const obj = {
+        id: columnId,
+        title : currentColumn.title
+      };
+
+      columnIdConfig.push(obj);       
+      console.log(currentColumn.title + ' ' + currentColumn.id);
+    }
+  }
+  
+  return columnIdConfig;
+}
+
   
 
 function parseColumnValues(currentItem, configVariables) {
