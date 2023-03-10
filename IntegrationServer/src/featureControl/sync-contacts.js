@@ -171,41 +171,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			}
 			doConfig = false;
 		} else {
-      
-			while(columnValuesIndex < currentItem.column_values.length) {			
-				let currentColumn = currentItem.column_values[columnValuesIndex]
-				let columnId = currentColumn.id
-				
-				switch(columnId) {
-					case configVariables.primaryEmailID:		//Primary Email
-						arrEmails.push({value: currentColumn.text, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.secondaryEmailID:		//Secondary Email
-						arrEmails.push({value: currentColumn.text, type: 'other', formattedType: 'Other' });
-						break;
-					case configVariables.workPhoneId:		//Work Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.mobilePhoneID:		//Mobile Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'mobile', formattedType: 'Mobile' });
-						break;
-					case configVariables.notesID:		//Notes
-						arrNotes.push({value: currentColumn.text, contentType: 'TEXT_PLAIN' });
-						break;
-					case 'item_id':
-						itemID = currentColumn.text;
-						break;
-				}
-				columnValuesIndex++;
-			}
+      const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
 			await service.people.createContact({
 				requestBody: {
 					names: [
@@ -323,40 +289,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 			}
 			doConfig = false;
 		} else {
-			while(columnValuesIndex < currentItem.column_values.length) {			
-				let currentColumn = currentItem.column_values[columnValuesIndex]
-				let columnId = currentColumn.id
-				
-				switch(columnId) {
-					case configVariables.primaryEmailID:		//Primary Email
-						arrEmails.push({value: currentColumn.text, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.secondaryEmailID:		//Secondary Email
-						arrEmails.push({value: currentColumn.text, type: 'other', formattedType: 'Other' });
-						break;
-					case configVariables.workPhoneId:		//Work Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.mobilePhoneID:		//Mobile Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'mobile', formattedType: 'Mobile' });
-						break;
-					case configVariables.notesID:		//Notes
-						arrNotes.push({value: currentColumn.text, contentType: 'TEXT_PLAIN' });
-						break;
-					case 'item_id':
-						itemID = currentColumn.text;
-						break;
-				}
-				columnValuesIndex++;
-			}
+			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
 			
 			itemMapping = await contactMappingService.getContactMapping(itemID);
 			if(itemMapping == null) {
@@ -422,6 +355,56 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 		}
 	}
 	return null;
+}
+  
+
+function parseColumnValues(currentItem, configVariables) {
+  const arrEmails = [];
+  const arrPhoneNumber = [];
+  const arrNotes = [];
+  let itemID = null;
+
+  for (const currentColumn of currentItem.column_values) {
+    const columnId = currentColumn.id;
+
+    switch (columnId) {
+      case configVariables.primaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'work', formattedType: 'Work' });
+        break;
+      case configVariables.secondaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'other', formattedType: 'Other' });
+        break;
+      case configVariables.workPhoneId:
+        arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'work', formattedType: 'Work' });
+        break;
+      case configVariables.mobilePhoneID:
+        arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'mobile', formattedType: 'Mobile' });
+        break;
+        arrPhoneNumber.push({ value: number, type: 'mobile', formattedType: 'Mobile' });
+        break;
+      case configVariables.notesID:
+        arrNotes.push({ value: currentColumn.text, contentType: 'TEXT_PLAIN' });
+        break;
+      case 'item_id':
+        itemID = currentColumn.text;
+        break;
+    }
+  }
+
+  return {
+    arrEmails,
+    arrPhoneNumber,
+    arrNotes,
+    itemID
+  };
+}
+
+function formatPhoneNumber(number) {
+  if (number.length === 10) {
+    return `1 (${number.slice(0, 3)}) ${number.substring(3, 6)}-${number.substring(6, 10)}`;
+  } else {
+    return number;
+  }
 }
 
 /**
