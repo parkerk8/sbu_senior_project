@@ -16,7 +16,7 @@ on:
     branches: [ "main", Sprint-1, Sprint-2 ]
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [ "main" ]
+    branches: [ "main", Sprint-2 ]
   schedule:
     - cron: '40 12 * * 2'
 
