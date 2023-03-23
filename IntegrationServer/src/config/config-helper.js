@@ -45,7 +45,7 @@ async function setConfigVariables (config) {
     }
     index++
   }
-  if (settings.createNewDatabase != undefined) {
+  if (settings.createNewDatabase !== undefined) {
     console.log('Create new database upon sync = ' + settings.createNewDatabase)
     configVariables.createNewDatabase = settings.createNewDatabase
   }

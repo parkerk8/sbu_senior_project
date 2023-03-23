@@ -21,7 +21,7 @@ async function updateContactInfo (req, res) {
 
   console.log(JSON.stringify(req.body.payload.inboundFieldValues))
 
-  if (changedColumnId == configVariables.primaryEmailID || changedColumnId == configVariables.secondaryEmailID || changedColumnId == configVariables.workPhoneId || changedColumnId == configVariables.mobilePhoneID || changedColumnId == configVariables.notesID) {
+  if (changedColumnId === configVariables.primaryEmailID || changedColumnId === configVariables.secondaryEmailID || changedColumnId === configVariables.workPhoneId || changedColumnId === configVariables.mobilePhoneID || changedColumnId === configVariables.notesID) {
     const name = itemMap.name
     const primaryEmail = itemMap[configVariables.primaryEmailID]
     const secondaryEmail = itemMap[configVariables.secondaryEmailID]
@@ -33,21 +33,21 @@ async function updateContactInfo (req, res) {
     // If there is only a first the other values will be undifined which the api call can handle
     const nameArr = await name.split(' ')
     // If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
-    if (nameArr.length == 2) {
+    if (nameArr.length === 2) {
       nameArr[2] = nameArr[1]
       nameArr[1] = ''
     }
 
     // Try to format moble and work phones
-    if (workPhone != undefined) {
+    if (workPhone !== undefined) {
       console.log(workPhone)
-      if (workPhone.length == 10) {
+      if (workPhone.length === 10) {
         workPhone = await '1 (' + workPhone.slice(0, 3) + ') ' + workPhone.substring(3, 6) + '-' + workPhone.substring(6, 10)
       }
     }
-    if (mobilePhone != undefined) {
+    if (mobilePhone !== undefined) {
       console.log(mobilePhone)
-      if (mobilePhone.length == 10) {
+      if (mobilePhone.length === 10) {
         mobilePhone = await '1 (' + mobilePhone.slice(0, 3) + ') ' + mobilePhone.substring(3, 6) + '-' + mobilePhone.substring(6, 10)
       }
     }

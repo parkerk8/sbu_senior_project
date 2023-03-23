@@ -13,19 +13,19 @@ const getBoardItems = async (token, boardId) => {
     mondayClient.setToken(token)
 
     const query = `query ($boardId: [Int]){
-					boards(limit:1 ids:$boardId) {
-						name
-						items {
-							name 
-							updated_at
-							column_values {
-								id
-								title
-								text
-							}
-						}
-					}
-				}`
+      boards(limit:1 ids:$boardId) {
+        name
+        items {
+          name 
+          updated_at
+          column_values {
+            id
+            title
+            text
+          }
+        }
+      }
+    }`
     const variables = { boardId }
 
     const response = await mondayClient.api(query, { variables })

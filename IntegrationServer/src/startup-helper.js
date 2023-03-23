@@ -1,4 +1,3 @@
-const { google } = require('googleapis')
 const fs = require('fs').promises
 
 const { setConfigVariables } = require('./config/config-helper.js')

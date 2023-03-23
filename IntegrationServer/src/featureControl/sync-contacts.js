@@ -95,7 +95,7 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
           const currentColumn = currentItem.column_values[columnValuesIndex]
           const columnId = currentColumn.id
 
-          if (boardItemIndex == 0 &&
+          if (boardItemIndex === 0 &&
               (process.env.WORK_PHONE_TITLE === currentColumn.title ||
                process.env.MOBILE_PHONE_TITLE === currentColumn.title ||
                process.env.EMAIL_PRIMARY_TITLE === currentColumn.title ||
@@ -130,7 +130,7 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
           const currentColumn = currentItem.column_values[columnValuesIndex]
           const columnId = currentColumn.id
 
-          if (boardItemIndex == 0 &&
+          if (boardItemIndex === 0 &&
               (process.env.WORK_PHONE_TITLE === currentColumn.title ||
                process.env.MOBILE_PHONE_TITLE === currentColumn.title ||
                process.env.EMAIL_PRIMARY_TITLE === currentColumn.title ||
@@ -172,14 +172,14 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
             break
           case configVariables.workPhoneId:		// Work Phone
             var number = currentColumn.text
-            if (number.length == 10) {
+            if (number.length === 10) {
               number = '1 (' + number.slice(0, 3) + ') ' + number.substring(3, 6) + '-' + number.substring(6, 10)
             }
             arrPhoneNumber.push({ value: number, type: 'work', formattedType: 'Work' })
             break
           case configVariables.mobilePhoneID:		// Mobile Phone
             var number = currentColumn.text
-            if (number.length == 10) {
+            if (number.length === 10) {
               number = '1 (' + number.slice(0, 3) + ') ' + number.substring(3, 6) + '-' + number.substring(6, 10)
             }
             arrPhoneNumber.push({ value: number, type: 'mobile', formattedType: 'Mobile' })
@@ -283,7 +283,7 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
           const currentColumn = currentItem.column_values[columnValuesIndex]
           const columnId = currentColumn.id
 
-          if (boardItemIndex == 0 &&
+          if (boardItemIndex === 0 &&
              (process.env.WORK_PHONE_TITLE === currentColumn.title ||
               process.env.MOBILE_PHONE_TITLE === currentColumn.title ||
               process.env.EMAIL_PRIMARY_TITLE === currentColumn.title ||
@@ -324,15 +324,15 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
             arrEmails.push({ value: currentColumn.text, type: 'other', formattedType: 'Other' })
             break
           case configVariables.workPhoneId:		// Work Phone
-            var number = currentColumn.text
-            if (number.length == 10) {
+            const number = currentColumn.text
+            if (number.length === 10) {
               number = '1 (' + number.slice(0, 3) + ') ' + number.substring(3, 6) + '-' + number.substring(6, 10)
             }
             arrPhoneNumber.push({ value: number, type: 'work', formattedType: 'Work' })
             break
           case configVariables.mobilePhoneID:		// Mobile Phone
-            var number = currentColumn.text
-            if (number.length == 10) {
+            number = currentColumn.text
+            if (number.length === 10) {
               number = '1 (' + number.slice(0, 3) + ') ' + number.substring(3, 6) + '-' + number.substring(6, 10)
             }
             arrPhoneNumber.push({ value: number, type: 'mobile', formattedType: 'Mobile' })

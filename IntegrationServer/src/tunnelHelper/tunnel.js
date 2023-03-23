@@ -4,7 +4,7 @@ const localtunnel = require('localtunnel') // Needed to run localtunnel.
 const MAX_ATTEMPTS = 5 // Max attempts at creating the tunnel
 
 // make a function that accepts a port number, and creats localtunnel at that port, and also has a variable keeping track of the number of times it tried to create the tunnel
-createTunnel = async (port, retries = 0) => {
+const createTunnel = async (port, retries = 0) => {
   const tunnel = await localtunnel({ // attempt to create a local tunnel with a desired host and subdomain by passing port and domain details.
     port,
     subdomain: process.env.TUNNEL_SUBDOMAIN
@@ -30,5 +30,5 @@ createTunnel = async (port, retries = 0) => {
 
 // Export the createTunnel function for use elsewhere.
 module.exports = {
-	 createTunnel
+  createTunnel
 }

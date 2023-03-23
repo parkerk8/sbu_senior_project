@@ -38,11 +38,11 @@ async function makeNewContact (req, res) {
   	} */
 
   	// Reformat phone number to be a bit nicer if input is regular number-string: "xxx xxx xxxx" (no spaces) =into=> "1 (xxx) xxx-xxxx" (with spaces)
-  	if ((workPhone != undefined) && (workPhone.length == 10)) { // Reformat work phone number
+  	if ((workPhone !== undefined) && (workPhone.length === 10)) { // Reformat work phone number
   		console.log('Reformat work-phone: ' + workPhone)
   		workPhone = await '1 (' + workPhone.slice(0, 3) + ') ' + workPhone.substring(3, 6) + '-' + workPhone.substring(6, 10)
   	}
-  	if ((mobilePhone != undefined) && (mobilePhone.length == 10)) { // Reformat mobile phone number
+  	if ((mobilePhone !== undefined) && (mobilePhone.length === 10)) { // Reformat mobile phone number
   		console.log('Reformat mobile-phone: ' + mobilePhone)
   		mobilePhone = await '1 (' + mobilePhone.slice(0, 3) + ') ' + mobilePhone.substring(3, 6) + '-' + mobilePhone.substring(6, 10)
   	}
@@ -69,35 +69,35 @@ async function makeNewContact (req, res) {
   				}
   			],
   			emailAddresses: [
-  					{
-  						value: primaryEmail,
-  						type: 'work',
-  						formattedType: 'Work'
-  					},
-  					{
-  						value: secondaryEmail,
-  						type: 'other',
-  						formattedType: 'Other'
-  					}
-  				],
-  				phoneNumbers: [
-  					{
-  						value: workPhone,
-  						type: 'work',
-  						formattedType: 'Work'
-  					},
-  					{
-  						value: mobilePhone,
-  						type: 'mobile',
-  						formattedType: 'Mobile'
-  					}
-  				],
-  				biographies: [
-  					{
-  						value: notes,
-  						contentType: 'TEXT_PLAIN'
-  					}
-  				]
+  				{
+  					value: primaryEmail,
+  					type: 'work',
+  					formattedType: 'Work'
+  				},
+  				{
+  					value: secondaryEmail,
+  					type: 'other',
+  					formattedType: 'Other'
+  				}
+        ],
+  			phoneNumbers: [
+  				{
+  					value: workPhone,
+  					type: 'work',
+  					formattedType: 'Work'
+  				},
+  				{
+  					value: mobilePhone,
+  					type: 'mobile',
+  					formattedType: 'Mobile'
+  				}
+  			],
+  			biographies: [
+  				{
+  					value: notes,
+  					contentType: 'TEXT_PLAIN'
+  				}
+  			]
   		}
   	}, async (err, res) => {
   			if (err) return console.error('The API returned an error: ' + err)

@@ -3,8 +3,10 @@ const router = express.Router()
 const Mutex = require('async-mutex').Mutex
 const rateLimit = require('express-rate-limit')
 
-const { makeContact, updateContact, populateContacts } = require('../featureControl')
-const { authRequestMiddleware } = require('../middleware')
+const { makeNewContact } = require('../featureControl/make-contact.js')
+const { populateContacts } = require('../featureControl/sync-contact.js')
+const { updateContact } = require('../featureControl/update-contact.js')
+const { authRequestMiddleware } = require('../middleware/auth-request')
 
 const mutex = new Mutex()
 
@@ -13,14 +15,12 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 })
 
-router.use(authRequestMiddleware)
-
 // get the required functions to use.
 // when a post request is sent to /create, then first run it threw the authentication, then if that passes, move it on into the actual function.
-router.post('/create', limiter, async (req, res) => {
+router.post('/create', limiter, authRequestMiddleware, async (req, res) => {
   const release = await mutex.acquire()
   try {
-    await makeContact(req, res)
+    await makeNewContact(req, res)
   } catch (err) {
     console.error('Error creating contact:', err)
     res.status(500).send('Error creating contact')
@@ -30,7 +30,7 @@ router.post('/create', limiter, async (req, res) => {
 })
 
 // when a post request is sent to /update, then first run it threw the authentication, then if that passes, move it on into the actual function.
-router.post('/update', limiter, async (req, res) => {
+router.post('/update', limiter, authRequestMiddleware, async (req, res) => {
   const release = await mutex.acquire()
   try {
     await updateContact(req, res)
@@ -42,7 +42,7 @@ router.post('/update', limiter, async (req, res) => {
   }
 })
 
-router.post('/sync', limiter, async (req, res) => {
+router.post('/sync', limiter, authRequestMiddleware, async (req, res) => {
   const release = await mutex.acquire()
   try {
     await populateContacts(req, res)
