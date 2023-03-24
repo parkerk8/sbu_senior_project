@@ -121,7 +121,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
         
 				let config = await fs.readFileSync("./config.json");
 				config = await JSON.parse(config); 
-				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				config.columnIds = columnIdConfig;
 				config.settings.createNewDatabase = false;
 				
@@ -187,7 +187,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 			let columnIdConfig = [];
 			if (!(fs.existsSync("./config.json"))) {
         
-				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				let config = {"columnIds" : columnIdConfig,
 					"settings":
 						{
@@ -203,7 +203,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 				  let config = await fs.readFileSync("./config.json");
 				  config = await JSON.parse(config); 
         
-				  columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
+				  columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				
 				  config.columnIds = columnIdConfig;
 				  config.settings.createNewDatabase = false;
@@ -292,7 +292,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 
 
 //FUNCTIONS GO HERE
-function getColumnIdConfig(currentItem, columnIdConfig) {
+function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
   const validTitles = [
     process.env.WORK_PHONE_TITLE,
     process.env.MOBILE_PHONE_TITLE,
