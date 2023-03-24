@@ -36,7 +36,7 @@ async function populateContacts(req, res) {
   let release = null;
   try {
     const boardItems = await getBoardItems(shortLivedToken, boardID);
-    release = await populateLock.acquire(); //Mutex lock - prevents sync from triggering again if already running.
+    release = await populateLock.acquire(); //Mutex lock - Locks sync from triggering again if already running.
 
     switch (createNewDatabase) {
       case true:
@@ -91,36 +91,20 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			await sleep(20000);
 		}
 
-		let columnValuesIndex = 0, currentItem = boardItems[boardItemIndex], name = currentItem.name; 
-    let arrName = name.split(" ", 2), arrEmails = [], arrPhoneNumber = [], arrNotes = [], itemID = '';
+		let columnValuesIndex = 0, 
+        currentItem = boardItems[boardItemIndex], 
+        name = currentItem.name, 
+        arrName = name.split(" ", 2), 
+        arrEmails = [], 
+        arrPhoneNumber = [], 
+        arrNotes = [], itemID = '';
 		
 		if(doConfig)
 		{
 			let columnIdConfig = [];
 			if (!(fs.existsSync("./config.json")))
 			{
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-					
-					if (boardItemIndex == 0 && 
-              (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-               process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-               process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-               process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-               process.env.NOTES_TITLE === currentColumn.title)) {
-						
-              const obj = {
-                 id: columnId,
-                 title: currentColumn.title
-              };
-						
-						  columnIdConfig.push(obj);
-						  console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
-        
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
 				const config = {
           "columnIds" : columnIdConfig,
 					"settings": {
@@ -137,28 +121,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
         
 				let config = await fs.readFileSync("./config.json");
 				config = await JSON.parse(config); 
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-				
-					if (boardItemIndex == 0 && 
-              (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-               process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-               process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-               process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-               process.env.NOTES_TITLE === currentColumn.title)) {
-            
-						const obj = {
-              id: columnId,
-							title : currentColumn.title
-            };
-							
-						columnIdConfig.push(obj);				
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
-				
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				config.columnIds = columnIdConfig;
 				config.settings.createNewDatabase = false;
 				
@@ -171,41 +134,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			}
 			doConfig = false;
 		} else {
-      
-			while(columnValuesIndex < currentItem.column_values.length) {			
-				let currentColumn = currentItem.column_values[columnValuesIndex]
-				let columnId = currentColumn.id
-				
-				switch(columnId) {
-					case configVariables.primaryEmailID:		//Primary Email
-						arrEmails.push({value: currentColumn.text, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.secondaryEmailID:		//Secondary Email
-						arrEmails.push({value: currentColumn.text, type: 'other', formattedType: 'Other' });
-						break;
-					case configVariables.workPhoneId:		//Work Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.mobilePhoneID:		//Mobile Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'mobile', formattedType: 'Mobile' });
-						break;
-					case configVariables.notesID:		//Notes
-						arrNotes.push({value: currentColumn.text, contentType: 'TEXT_PLAIN' });
-						break;
-					case 'item_id':
-						itemID = currentColumn.text;
-						break;
-				}
-				columnValuesIndex++;
-			}
+      const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
 			await service.people.createContact({
 				requestBody: {
 					names: [
@@ -257,27 +186,8 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 		if(doConfig == true) {
 			let columnIdConfig = [];
 			if (!(fs.existsSync("./config.json"))) {
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
-					
-					if(boardItemIndex == 0 && 
-             (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-              process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-              process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-              process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-              process.env.NOTES_TITLE === currentColumn.title)) {
-            
-						const obj = {
-							id: columnId,
-							title: currentColumn.title
-						};
-						
-						columnIdConfig.push(obj);
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
+        
+				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				let config = {"columnIds" : columnIdConfig,
 					"settings":
 						{
@@ -290,75 +200,27 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
             console.log('config stored to ./config.json');
 				});
       } else {
-				let config = await fs.readFileSync("./config.json");
-				config = await JSON.parse(config); 
-				while(columnValuesIndex < currentItem.column_values.length) {
-					let currentColumn = currentItem.column_values[columnValuesIndex]
-					let columnId = currentColumn.id;
+				  let config = await fs.readFileSync("./config.json");
+				  config = await JSON.parse(config); 
+        
+				  columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
 				
-					if(boardItemIndex == 0 && 
-             (process.env.WORK_PHONE_TITLE === currentColumn.title || 
-              process.env.MOBILE_PHONE_TITLE === currentColumn.title || 
-              process.env.EMAIL_PRIMARY_TITLE === currentColumn.title || 
-              process.env.EMAIL_SECONDARY_TITLE === currentColumn.title || 
-              process.env.NOTES_TITLE === currentColumn.title)) {
-						const obj = {id: columnId,
-								title : currentColumn.title};
-							
-						columnIdConfig.push(obj);				
-						console.log(currentColumn.title + ' ' + currentColumn.id);
-					}
-					columnValuesIndex++;
-				}
+				  config.columnIds = columnIdConfig;
+				  config.settings.createNewDatabase = false;
 				
-				config.columnIds = columnIdConfig;
-				config.settings.createNewDatabase = false;
-				
-				await setConfigVariables(config)
+				  await setConfigVariables(config)
 	
-				fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-            if (err) return err;
-            console.log('config.json updated');
-				});
+          fs.writeFile("./config.json", JSON.stringify(config), (err) => {
+              if (err) return err;
+              console.log('config.json updated');
+          });
 			}
 			doConfig = false;
 		} else {
-			while(columnValuesIndex < currentItem.column_values.length) {			
-				let currentColumn = currentItem.column_values[columnValuesIndex]
-				let columnId = currentColumn.id
-				
-				switch(columnId) {
-					case configVariables.primaryEmailID:		//Primary Email
-						arrEmails.push({value: currentColumn.text, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.secondaryEmailID:		//Secondary Email
-						arrEmails.push({value: currentColumn.text, type: 'other', formattedType: 'Other' });
-						break;
-					case configVariables.workPhoneId:		//Work Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'work', formattedType: 'Work' });
-						break;
-					case configVariables.mobilePhoneID:		//Mobile Phone
-						var number = currentColumn.text;
-						if(number.length == 10) {
-							number = '1 (' + number.slice(0,3) + ') ' + number.substring(3,6) + '-' + number.substring(6,10);
-						}
-						arrPhoneNumber.push({value: number, type: 'mobile', formattedType: 'Mobile' });
-						break;
-					case configVariables.notesID:		//Notes
-						arrNotes.push({value: currentColumn.text, contentType: 'TEXT_PLAIN' });
-						break;
-					case 'item_id':
-						itemID = currentColumn.text;
-						break;
-				}
-				columnValuesIndex++;
-			}
-			
+      
+			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
 			itemMapping = await contactMappingService.getContactMapping(itemID);
+      
 			if(itemMapping == null) {
 				await service.people.createContact({
 					requestBody: {
@@ -422,6 +284,90 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 		}
 	}
 	return null;
+}
+
+
+
+
+
+
+//FUNCTIONS GO HERE
+function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
+  const validTitles = [
+    process.env.WORK_PHONE_TITLE,
+    process.env.MOBILE_PHONE_TITLE,
+    process.env.EMAIL_PRIMARY_TITLE,
+    process.env.EMAIL_SECONDARY_TITLE,
+    process.env.NOTES_TITLE
+  ];
+
+  for (let i = 0; i < currentItem.column_values.length; i++) {
+    let currentColumn = currentItem.column_values[i];
+    let columnId = currentColumn.id;
+
+    if (boardItemIndex == 0 && validTitles.includes(currentColumn.title)) {
+      const obj = {
+        id: columnId,
+        title : currentColumn.title
+      };
+
+      columnIdConfig.push(obj);       
+      console.log(currentColumn.title + ' ' + currentColumn.id);
+    }
+  }
+  
+  return columnIdConfig;
+}
+
+  
+
+function parseColumnValues(currentItem, configVariables) {
+  const arrEmails = [];
+  const arrPhoneNumber = [];
+  const arrNotes = [];
+  let itemID = null;
+
+  for (const currentColumn of currentItem.column_values) {
+    const columnId = currentColumn.id;
+
+    switch (columnId) {
+      case configVariables.primaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'work', formattedType: 'Work' });
+        break;
+      case configVariables.secondaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'other', formattedType: 'Other' });
+        break;
+      case configVariables.workPhoneId:
+        arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'work', formattedType: 'Work' });
+        break;
+      case configVariables.mobilePhoneID:
+        arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'mobile', formattedType: 'Mobile' });
+        break;
+        arrPhoneNumber.push({ value: number, type: 'mobile', formattedType: 'Mobile' });
+        break;
+      case configVariables.notesID:
+        arrNotes.push({ value: currentColumn.text, contentType: 'TEXT_PLAIN' });
+        break;
+      case 'item_id':
+        itemID = currentColumn.text;
+        break;
+    }
+  }
+
+  return {
+    arrEmails,
+    arrPhoneNumber,
+    arrNotes,
+    itemID
+  };
+}
+
+function formatPhoneNumber(number) {
+  if (number.length === 10) {
+    return `1 (${number.slice(0, 3)}) ${number.substring(3, 6)}-${number.substring(6, 10)}`;
+  } else {
+    return number;
+  }
 }
 
 /**
