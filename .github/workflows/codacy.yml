@@ -15,7 +15,7 @@ name: Codacy Security Scan
 
 on:
   push:
-    branches: [ "main", Sprint-1 ]
+    branches: [ "main", Sprint-1, Sprint-2 ]
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
