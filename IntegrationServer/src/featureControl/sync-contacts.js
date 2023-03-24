@@ -28,7 +28,7 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
  * @param req - The request object
  * @param res - The response object
  */
-async function populateContacts(req, res) {
+async function fetchContacts(req, res) {
   const { shortLivedToken } = req.session;
   const { boardID } = req.body.payload.inputFields;
   const { createNewDatabase } = configVariables;
@@ -286,11 +286,6 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 	return null;
 }
 
-
-
-
-
-
 //FUNCTIONS GO HERE
 function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
   const validTitles = [
@@ -383,5 +378,5 @@ function sleep(ms) {
 }
 
 module.exports = {
-	populateContacts
+	fetchContacts
 };

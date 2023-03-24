@@ -15,7 +15,7 @@ const {configVariables} = require('../config/config-helper.js');
  * @param res - the response object
  * @returns a promise.
  */
-async function updateContactInfo(req, res){
+async function updateExistingContactInfo(req, res){
 
 	const {inboundFieldValues} = req.body.payload;
   const itemMap = inboundFieldValues.itemMapping;
@@ -176,5 +176,5 @@ async function update(resourceName, etag, itemID, nameArr, primaryEmail, seconda
 
 
 module.exports = {
-	updateContactInfo,
+	updateExistingContactInfo,
 };
