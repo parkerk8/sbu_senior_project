@@ -13,7 +13,7 @@ const {getBoardItems} = require('../services/monday-service.js');
 const fs = require('fs');
 
 /* Import the configVariables from the config-helper.js file. */
-var {configVariables} = require('../config/config-helper.js'); // List of IDs for the various titles being looked at on Monday.com
+var { getConfigVariables } = require('../config/config-helper.js'); // List of IDs for the various titles being looked at on Monday.com
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables;
 
 
@@ -31,7 +31,7 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
 async function fetchContacts(req, res) {
   const { shortLivedToken } = req.session;
   const { boardID } = req.body.payload.inputFields;
-  const { createNewDatabase } = configVariables;
+  const { createNewDatabase } = getConfigVariables;
 
   let release = null;
   try {
@@ -134,7 +134,7 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			}
 			doConfig = false;
 		} else {
-      const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
+      const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, getConfigVariables);
 			await service.people.createContact({
 				requestBody: {
 					names: [
@@ -218,7 +218,7 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 			doConfig = false;
 		} else {
       
-			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
+			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, getConfigVariables);
 			itemMapping = await contactMappingService.getContactMapping(itemID);
       
 			if(itemMapping == null) {
@@ -316,7 +316,7 @@ function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
 
   
 
-function parseColumnValues(currentItem, configVariables) {
+function parseColumnValues(currentItem, getConfigVariables) {
   const arrEmails = [];
   const arrPhoneNumber = [];
   const arrNotes = [];
@@ -326,21 +326,21 @@ function parseColumnValues(currentItem, configVariables) {
     const columnId = currentColumn.id;
 
     switch (columnId) {
-      case configVariables.primaryEmailID:
+      case getConfigVariables.primaryEmailID:
         arrEmails.push({ value: currentColumn.text, type: 'work', formattedType: 'Work' });
         break;
-      case configVariables.secondaryEmailID:
+      case getConfigVariables.secondaryEmailID:
         arrEmails.push({ value: currentColumn.text, type: 'other', formattedType: 'Other' });
         break;
-      case configVariables.workPhoneId:
+      case getConfigVariables.workPhoneId:
         arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'work', formattedType: 'Work' });
         break;
-      case configVariables.mobilePhoneID:
+      case getConfigVariables.mobilePhoneID:
         arrPhoneNumber.push({ value: formatPhoneNumber(currentColumn.text), type: 'mobile', formattedType: 'Mobile' });
         break;
         arrPhoneNumber.push({ value: number, type: 'mobile', formattedType: 'Mobile' });
         break;
-      case configVariables.notesID:
+      case getConfigVariables.notesID:
         arrNotes.push({ value: currentColumn.text, contentType: 'TEXT_PLAIN' });
         break;
       case 'item_id':

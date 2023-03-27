@@ -7,7 +7,7 @@ const service = google.people({version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-const {configVariables} = require('../config/config-helper.js');
+const { getConfigVariables } = require('../config/config-helper.js');
 
 /**
  * It takes the data from the webhook, formats it, and then sends it to the update function.
@@ -30,7 +30,7 @@ async function updateExistingContactInfo(req, res){
     workPhoneID,
     mobilePhoneID,
     notesID,
-  } = configVariables;
+  } = getConfigVariables;
 
   if ([primaryEmailID, secondaryEmailID, workPhoneID, mobilePhoneID, notesID].includes(changedColumnId)) {
     const name = itemMap.name;

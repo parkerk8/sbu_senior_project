@@ -6,7 +6,7 @@ const service = google.people( {version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-const {configVariables} = require('../config/config-helper.js');
+const {getConfigVariables} = require('../config/config-helper.js');
 
 async function makeNewContact(req, res) {
   try {
@@ -23,7 +23,7 @@ async function makeNewContact(req, res) {
       return res.status(409).send({});
     } else {
       // Get name and the IDs of the Title Fields that exist from contactMappingService
-      let {name, [configVariables.primaryEmailID]: primaryEmail, [configVariables.secondaryEmailID]: secondaryEmail, [configVariables.workPhoneId]: workPhone, [configVariables.mobilePhoneID]: mobilePhone, [configVariables.notesID]: notes} = itemMap;
+      let {name, [getConfigVariables.primaryEmailID]: primaryEmail, [getConfigVariables.secondaryEmailID]: secondaryEmail, [getConfigVariables.workPhoneId]: workPhone, [getConfigVariables.mobilePhoneID]: mobilePhone, [getConfigVariables.notesID]: notes} = itemMap;
 
       
       //Splits the contact into an array to seperate first name from middle and/or last name - 
