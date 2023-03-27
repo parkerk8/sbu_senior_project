@@ -5,10 +5,10 @@ const MAX_ATTEMPTS = 5 // Max attempts at creating the tunnel
 
 // make a function that accepts a port number, and creats localtunnel at that port, and also has a variable keeping track of the number of times it tried to create the tunnel
 const createTunnel = async (port, retries = 0) => {
-  const tunnel = await localtunnel({ // attempt to create a local tunnel with a desired host and subdomain by passing port and domain details.
-    port,
-    subdomain: process.env.TUNNEL_SUBDOMAIN
-  })
+const tunnel = await localtunnel({ // attempt to create a local tunnel with a desired host and subdomain by passing port and domain details.
+  port,
+  subdomain: process.env.TUNNEL_SUBDOMAIN
+})
 
   // Check if the desired subdomain was obtained. IF it was not, retry unitl MAX_ATTEMPS is reached, or until the desired subdomain is obtianed
   const usedSubDomain = tunnel.url.includes(process.env.TUNNEL_SUBDOMAIN)

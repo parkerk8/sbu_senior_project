@@ -30,5 +30,10 @@ router.use(oauthRoutes)
 // Adding error handling middleware to the router
 router.use(errorHandler)
 
+// Route that just posts "Hello World" to verif yit is up and running 
+router.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
 // Exporting the router to be used by the main server file.
 module.exports = router
