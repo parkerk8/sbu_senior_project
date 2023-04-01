@@ -1,4 +1,4 @@
-var google_auth = require("../src/OAuth/google-auth.js");
+var GoogleAuth = require("../src/OAuth/google-auth.js");
 const chai = require('chai');
 const chaiHttp = require('chai-http');
 const { expect } = chai;
