@@ -13,7 +13,7 @@ let { configVariables } = require('../config/config-helper.js');
 const OAuth2Client = new google.auth.OAuth2(
 	process.env.GOOGLE_CLIENT_ID,
 	process.env.GOOGLE_CLIENT_SECRET,
-	process.env.BACK_TO_URL)
+	process.env.BACK_TO_URL);
 	  //"232811749250-phji8o1bmnd86b3vff1uetdkp12138vi.apps.googleusercontent.com", //YOUR_CLIENT_ID
 	  //"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", //YOUR_CLIENT_SECRET
 	  //"http://localhost:3000/tokenHandle") //backToUrl
@@ -41,7 +41,7 @@ async function setUpOAuth (req, res) {
 				    console.error(err);
 				    return;
 			  }
-        OAuth2Client.credentials = JSON.parse(token);;
+        OAuth2Client.credentials = JSON.parse(token);
 			  let returnUrl = req.session.backToUrl;
 			  return res.redirect(returnUrl);
     });
