@@ -1,12 +1,13 @@
 const {google} = require('googleapis');
-const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
+const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient;
+
 google.options({auth: OAuth2Client});
 
 const service = google.people({version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-let {configVariables} = require('../config/config-helper.js');
+const {configVariables} = require('../config/config-helper.js');
 
 /**
  * It takes the data from the webhook, formats it, and then sends it to the update function.
@@ -16,17 +17,28 @@ let {configVariables} = require('../config/config-helper.js');
  */
 async function updateContactInfo(req, res){
 
-	let itemMap = req.body.payload.inboundFieldValues.itemMapping
-	let changedCollumnId = req.body.payload.inboundFieldValues.columnId
-	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
-	if(changedCollumnId == configVariables.primaryEmailID ||changedCollumnId == configVariables.secondaryEmailID || changedCollumnId == configVariables.workPhoneId || changedCollumnId == configVariables.mobilePhoneID ||changedCollumnId == configVariables.notesID)
-	{
-		let name = itemMap.name
-		let primaryEmail = itemMap[configVariables.primaryEmailID];
-		let secondaryEmail = itemMap[configVariables.secondaryEmailID];
-		let workPhone = itemMap[configVariables.workPhoneId];
-		let mobilePhone = itemMap[configVariables.mobilePhoneID];
-		let notes = itemMap[configVariables.notesID];
+	const {inboundFieldValues} = req.body.payload;
+  const itemMap = inboundFieldValues.itemMapping;
+  const changedColumnId = inboundFieldValues.columnId;
+  const itemID = JSON.stringify(inboundFieldValues.itemId);
+
+	console.log(JSON.stringify(inboundFieldValues));
+
+	 const {
+    primaryEmailID,
+    secondaryEmailID,
+    workPhoneID,
+    mobilePhoneID,
+    notesID,
+  } = configVariables;
+
+  if ([primaryEmailID, secondaryEmailID, workPhoneID, mobilePhoneID, notesID].includes(changedColumnId)) {
+    const name = itemMap.name;
+    const primaryEmail = itemMap[primaryEmailID];
+    const secondaryEmail = itemMap[secondaryEmailID];
+    let workPhone = itemMap[workPhoneID];
+    let mobilePhone = itemMap[mobilePhoneID];
+    const notes = itemMap[notesID];
 	
 		//Splits the contact into an array to seperate first, middle, last
 		//If there is only a first the other values will be undifined which the api call can handle
@@ -76,9 +88,7 @@ async function updateContactInfo(req, res){
 			console.log("Catch block err: " + err);
 		}
 		return res.status(200).send({});
-	}
-	else
-	{
+	} else {
 		console.log("no change");
 		return res.status(200).send({});
 	}
