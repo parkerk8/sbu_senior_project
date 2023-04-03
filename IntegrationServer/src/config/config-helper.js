@@ -1,62 +1,55 @@
 const fs = require('fs');
 
+const configVariables = Object.freeze({
+  workPhoneId: '',
+  mobilePhoneId: '',
+  primaryEmailId: '',
+  secondaryEmailId: '',
+  notesId: '',
+  createNewDatabase: true,
+});
 
+const sectionTitlesToVariables = {
+  [process.env.WORK_PHONE_TITLE]: 'workPhoneId',
+  [process.env.MOBILE_PHONE_TITLE]: 'mobilePhoneId',
+  [process.env.EMAIL_PRIMARY_TITLE]: 'primaryEmailId',
+  [process.env.EMAIL_SECONDARY_TITLE]: 'secondaryEmailId',
+  [process.env.NOTES_TITLE]: 'notesId',
+};
 
-/* Creating a JSON object with the keys and values. */
-const configVariables = {
-	"workPhoneId": '',
-	"mobilePhoneID": '',
-	"primaryEmailID": '',
-	"secondaryEmailID": '',
-	"notesID": '',
-	"createNewDatabase": true
+/**
+ * Sets the config variables based on the provided config object.
+ * @param {object} config - The config object.
+ * @throws {Error} If the config object is invalid.
+ */
+function setConfigVariables(config) {
+  if (!config || !config.columnIds || !config.settings) {
+    throw new Error('Invalid config object');
+  }
+
+  const { columnIds, settings } = config;
+
+  for (const section of columnIds) {
+    const variableName = sectionTitlesToVariables[section.title];
+    if (variableName) {
+      configVariables[variableName] = section.id;
+    }
+  }
+
+  if (settings.hasOwnProperty('createNewDatabase')) {
+    configVariables.createNewDatabase = settings.createNewDatabase;
+  }
 }
 
 /**
- * Takes a JSON object as a parameter, and then it loops through the object and assigns the values
- * of the object to variables.
- * @param config - A json object containing values to be set for the config variables.
+ * Returns a copy of the config variables object.
+ * @returns {object} A copy of the config variables object.
  */
-async function setConfigVariables (config){
-	let {columnIds, settings} = config;
-	
-	let index = 0;
-	while(index < columnIds.length)
-	{
-		let currentSection = columnIds[index]
-		switch(currentSection.title){
-			case process.env.WORK_PHONE_TITLE:
-				console.log(currentSection.id);
-				configVariables.workPhoneId = currentSection.id;
-				break;
-			case process.env.MOBILE_PHONE_TITLE:
-				console.log(currentSection.id);
-				configVariables.mobilePhoneID = currentSection.id;
-				break;
-			case process.env.EMAIL_PRIMARY_TITLE:
-				console.log(currentSection.id);
-				configVariables.primaryEmailID = currentSection.id;
-				break;
-			case process.env.EMAIL_SECONDARY_TITLE:
-				console.log(currentSection.id);
-				configVariables.secondaryEmailID = currentSection.id;
-				break;
-			case process.env.NOTES_TITLE:
-				console.log(currentSection.id);
-				configVariables.notesID = currentSection.id;
-				break;
-			}
-		index++;
-	}
-	if(settings.createNewDatabase != undefined)
-	{
-		console.log("Create new database upon sync = " + settings.createNewDatabase);
-		configVariables.createNewDatabase = settings.createNewDatabase;
-	}
+function getConfigVariables() {
+  return { ...configVariables };
 }
 
-/* Exporting the variables and functions to be used in other files. */
 module.exports = {
-	configVariables,
-	setConfigVariables
-}
+  setConfigVariables,
+  getConfigVariables,
+};

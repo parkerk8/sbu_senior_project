@@ -1,14 +1,27 @@
 const express = require('express');
 const router = express.Router();
- 
+const rateLimit = require('express-rate-limit');
 
-const hanleAuth = require('../OAuth/google-auth.js').setUpOAuth;   
-const generateToken = require('../OAuth/google-auth.js').codeHandle;
-const AuthenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
-//get the required functions to use.
+const { setUpOAuth, codeHandle } = require('../OAuth/google-auth');
+const { authRequestMiddleware } = require('../middleware/auth-request');
+const { errorHandler } = require('../middleware/error-handler');
 
+const WINDOWS_MS = 15 * 60 * 1000; // 15 minutes
 
-router.get('/auth', AuthenticationMiddleware, hanleAuth);
-router.get('/tokenHandle', generateToken);
+// Set up rate limiting options
+const limiter = rateLimit({
+  windowMs: WINDOWS_MS, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX // limit each IP to a configurable number of requests per windowMs
+});
+
+// Apply limiter to the router
+router.use(limiter);
+
+// Set up routes
+router.get('/auth', authRequestMiddleware, setUpOAuth);
+router.get('/tokenHandle', authRequestMiddleware, codeHandle);
+
+// Apply error handling middleware to the router
+router.use(errorHandler);
 
 module.exports = router;

@@ -1,0 +1,8 @@
+/.env
+/config.json
+/token.json
+node_modules
+/package-lock.json
+/.env
+/token.json
+/database.sqlite3
