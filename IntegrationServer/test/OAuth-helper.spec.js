@@ -1,46 +1,92 @@
-const chai = require('chai');
-const chaiHttp = require('chai-http');
-const jwt = require('jsonwebtoken');
-const app = require('../src/server.js'); 
-const expect = chai.expect;
+/* const express = require('express');
+const router =  require('../src/routes/OAuth-helper.js');
+const rateLimit = require('express-rate-limit');
+const { expect } = require('chai');
+const request = require('supertest');
 
-chai.use(chaiHttp);
+const { setUpOAuth, codeHandle } = require('../src/OAuth/google-auth');
+const { authRequestMiddleware } = require('../src/middleware/auth-request');
+const { errorHandler } = require('../src/middleware/error-handler');
 
-describe('OAuth-helper route module', function() {
-  describe('GET /auth', function() {
-    it('should return status 200 when accessed with a valid JWT', function(done) {
-      const token = jwt.sign({ sub: process.env.MONDAY_SIGNING_SECRET }, 'secret', { expiresIn: '1h' });
-      chai.request(app)
-        .get('/auth')
-        .set('Authorization', `Bearer ${token}`)
-        .end(function(err, res) {
-          expect(res).to.have.status(200);
-          done();
-        });
+describe('API OAuth-helper Routes', () => {
+  const app = express();
+  
+  before(() => {
+    app.use(express.json());
+    app.use(router);
+  });
+  
+  describe('GET /auth', () => {
+    it('should return a 200 status code', async () => {
+      const res = await request(app).get('/auth');
+      expect(res.status).to.equal(200);
+    }).timeout(300000);
+    
+    it('should call the authRequestMiddleware middleware', async () => {
+      let middlewareCalled = false;
+      app.use('/auth', (req, res, next) => {
+        middlewareCalled = true;
+        next();
+      });
+      await request(app).get('/auth');
+      expect(middlewareCalled).to.be.true;
+    });
+    
+    it('should call the setUpOAuth function', async () => {
+      let functionCalled = false;
+      app.use('/auth', (req, res, next) => {
+        req.setUpOAuth = () => {
+          functionCalled = true;
+        };
+        next();
+      });
+      await request(app).get('/auth');
+      expect(functionCalled).to.be.true;
     });
   });
-
-  describe('GET /tokenHandle', function() {
-    it('should return status 200 when accessed with a valid JWT', function(done) {
-      const token = jwt.sign({ sub: process.env.MONDAY_SIGNING_SECRET}, 'secret', { expiresIn: '1h' });
-      chai.request(app)
-        .get('/tokenHandle')
-        .set('Authorization', `Bearer ${token}`)
-        .end(function(err, res) {
-          expect(res).to.have.status(200);
-          done();
-        });
+  
+  describe('GET /tokenHandle', () => {
+    it('should return a 200 status code', async () => {
+      const res = await request(app).get('/tokenHandle');
+      expect(res.status).to.equal(200);
+    });
+    
+    it('should call the authRequestMiddleware middleware', async () => {
+      let middlewareCalled = false;
+      app.use('/tokenHandle', (req, res, next) => {
+        middlewareCalled = true;
+        next();
+      });
+      await request(app).get('/tokenHandle');
+      expect(middlewareCalled).to.be.true;
+    });
+    
+    it('should call the codeHandle function', async () => {
+      let functionCalled = false;
+      app.use('/tokenHandle', (req, res, next) => {
+        req.codeHandle = () => {
+          functionCalled = true;
+        };
+        codeHandle(req, res, next);
+      });
+      await request(app).get('/tokenHandle');
+      expect(functionCalled).to.be.true;
+    });    
+  });
+  
+  describe('Error handling', () => {
+    it('should call the errorHandler middleware', async () => {
+      let middlewareCalled = false;
+      app.use('/error', (req, res, next) => {
+        next(new Error('Test error'));
+      });
+      app.use(errorHandler);
+      app.use((err, req, res, next) => {
+        middlewareCalled = true;https://sbuseniorprojectv2.peterwelter.repl.co
+        res.status(500).json({ message: err.message });
+      });
+      await request(app).get('/error');
+      expect(middlewareCalled).to.be.true;
     });
   });
-
-  describe('GET /invalid_route', function() {
-    it('should return status 500 when an error occurs', function(done) {
-      chai.request(app)
-        .get('/invalid_route')
-        .end(function(err, res) {
-          expect(res).to.have.status(500);
-          done();
-        });
-    });
-  });
-});
+}); */

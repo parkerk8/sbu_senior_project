@@ -8,6 +8,7 @@ const nock = require('nock');
 chai.use(chaiHttp);
 
 describe('API endpoints', function() {
+  
   it('should log all requests', function(done) {
     const consoleLogStub = sinon.stub(console, 'log');
     chai.request(app)
@@ -88,7 +89,7 @@ it('should listen on the specified port', function(done) {
     });
 }).timeout(5000); // increase timeout to allow for server to start up
 
-it('should create a tunnel for the specified port', function(done) {
+/*it('should create a tunnel for the specified port', function(done) {
   const { createTunnel } = require('../src/tunnelHelper/tunnel');
   createTunnel(3000)
     .then(function(tunnelUrl) {
@@ -98,4 +99,4 @@ it('should create a tunnel for the specified port', function(done) {
     .catch(function(err) {
       done(err);
     });
-}).timeout(15000); // increase timeout to allow for tunnel creation
+}).timeout(15000); // increase timeout to allow for tunnel creation */

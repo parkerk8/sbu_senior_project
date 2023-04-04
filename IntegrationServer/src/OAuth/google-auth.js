@@ -2,8 +2,12 @@ const { google } = require('googleapis')
 const fs = require('fs')
 const NodeCache = require('node-cache')
 const myCache = new NodeCache({ stdTTL: 1000, useClones: false })
+const express = require('express');
+const app = express();
 
-console.log('I made it to google-oauth.js')
+app.get('/callback', async (req, res) => {
+  await codeHandle(req, res);
+});
 
 const OAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -50,37 +54,38 @@ async function setUpOAuth (req, res) {
 	  }
 }
 
-async function codeHandle (req, res) {
+async function codeHandle(req, res) {
   // Creates a new token or detects if a token already exists
-  console.log('I made it to token-store-permissions.js')
-  backToUrl = myCache.get('returnURl')
-  if (backToUrl == undefined) { return res.status(200).send({}) } else {
-	    myCache.del('returnURl')
-    if (!(fs.existsSync('./token.json'))) {
-      const TOKEN_PATH = './token.json'
-      const code = req.query.code
-      console.log(code)
+  backToUrl = myCache.get('returnURl');
+  if (backToUrl == undefined) {
+    return res.status(200).send({});
+  } else {
+    myCache.del('returnURl');
+    if (!fs.existsSync('./token.json')) {
+      const TOKEN_PATH = './token.json';
+      const code = req.query.code;
+      console.log(code);
 
       OAuth2Client.getToken(code, (err, token) => {
-        if (err) { return console.error('Error retrieving access token', err) }
-        OAuth2Client.credentials = token
-        console.log(token)
+        if (err) {
+          return console.error('Error retrieving access token', err);
+        }
+        OAuth2Client.credentials = token;
+        console.log(token);
         fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-          if (err) return console.error(err)
-          console.log('Token stored to', TOKEN_PATH)
-        })
+          if (err) return console.error(err);
+          console.log('Token stored to', TOKEN_PATH);
+        });
         // Store the token to disk for later program executions
-      })
-      return res.redirect(backToUrl)
-    }
-    // If the token exists, sets up OAuth2 client
-    else {
-      const TOKEN_PATH = './token.json'
+        res.redirect(backToUrl); // redirect the user
+      });
+    } else {
+      const TOKEN_PATH = './token.json';
       fs.readFile('./token.json', (err, token) => {
-        if (err) return console.error(err)
-        OAuth2Client.credentials = JSON.parse(token)
-      })
-      return res.redirect(backToUrl)
+        if (err) return console.error(err);
+        OAuth2Client.credentials = JSON.parse(token);
+        res.redirect(backToUrl); // redirect the user
+      });
     }
   }
 }

@@ -15,6 +15,7 @@
 		"googleapis": "^95.0.0",
 		"http": "^0.0.1-security",
 		"jsonwebtoken": "^8.5.1",
+		"memory-cache": "^0.2.0",
 		"mocha-junit-reporter": "^2.2.0",
 		"mock-fs": "^5.2.0",
 		"monday-sdk-js": "^0.0.12",
@@ -30,6 +31,7 @@
 		"sequelize": "^6.3.5",
 		"sequelize-mock": "^0.10.2",
 		"sinon": "^15.0.1",
+		"sinon-chai": "^3.7.0",
 		"sqlite3": "^5.0.4",
 		"supertest": "^6.3.3",
 		"tmp": "^0.2.1"
@@ -45,12 +47,12 @@
 	},
 	"main": "server.js",
 	"scripts": {
-		"start": "npm run stop && npm run db:migrate && npm run server",
+		"start": "npm run stop && npm run db:migrate && npm run server && nyc --reporter=html",
 		"server": "nodemon ./src/server.js",
 		"db:migrate": "sequelize db:migrate",
 		"stop": "kill-port 3000",
 		"test": "mocha",
-		"test-with-coverage": "nyc --reporter=text mocha",
+		"testWithCoverage": "nyc --reporter=html mocha && python3 main.py > ./src/coverage/index.html",
 		"debug": "node --inspect src/server.js"
 	},
 	"nodemonConfig": {
