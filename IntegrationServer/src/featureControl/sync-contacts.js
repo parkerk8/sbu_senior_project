@@ -16,7 +16,9 @@ const fs = require('fs');
 var {configVariables} = require('../config/config-helper.js'); // List of IDs for the various titles being looked at on Monday.com
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables;
 
+const conf = "./config.json"; //CONFIG FILE REFERENCE - this file may not exist, in which case it will be created later
 
+//NOTE:
 //Monday will send a duplicate request if it doesn't get a response in 30 seconds.
 //This is very much an issue with the populate function, which takes far longer than that to execute.
 //This lock varibale is used to prevent multiple sync requests happening simultaniusly 
@@ -37,6 +39,8 @@ async function populateContacts(req, res) {
   try {
     const boardItems = await getBoardItems(shortLivedToken, boardID);
     release = await populateLock.acquire(); //Mutex lock - Locks sync from triggering again if already running.
+
+    initializeConfig(boardItems);
 
     switch (createNewDatabase) {
       case true:
@@ -76,14 +80,13 @@ async function populateContacts(req, res) {
  * @param boardItems - an array of objects that contain the information for each contact.
  * @returns null.
  */
-async function initalSetupGoogleContacts(boardItems){   //makes new database.
+async function initalSetupGoogleContacts(boardItems) {   //makes new database.
   
-  let boardItemIndex = 0;
-	let doConfig = true;
+  boardItemIndex = 1;
 	
 	await contactMappingService.deleteDatabse();
 	console.log(boardItems.length);
-	
+
 	while(boardItemIndex < boardItems.length) {
 
     //I have issues with how they are doing this...
@@ -91,75 +94,36 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
 			await sleep(20000);
 		}
 
-		let columnValuesIndex = 0, 
-        currentItem = boardItems[boardItemIndex], 
-        name = currentItem.name, 
-        arrName = name.split(" ", 2), 
-        arrEmails = [], 
-        arrPhoneNumber = [], 
-        arrNotes = [], itemID = '';
-		
-		if(doConfig)
-		{
-			let columnIdConfig = [];
-			if (!(fs.existsSync("./config.json")))
-			{
-				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
-				const config = {
-          "columnIds" : columnIdConfig,
-					"settings": {
-									"createNewDatabase": false
-					 },
-				};
-				await setConfigVariables(config)
-				fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-          if (err) return err;
-          console.log('config stored to ./config.json');
-				});
-        
-      } else {
-        
-				let config = await fs.readFileSync("./config.json");
-				config = await JSON.parse(config); 
-				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
-				config.columnIds = columnIdConfig;
-				config.settings.createNewDatabase = false;
-				
-				await setConfigVariables(config)
-	
-				fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-                if (err) return err;
-                console.log('config.json updated');
-				});
-			}
-			doConfig = false;
-		} else {
-      const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
-			await service.people.createContact({
-				requestBody: {
-					names: [
-						{
-							displayName: name,
-							familyName: arrName[1],
-							givenName: arrName[0]
-						},
-					],
-					emailAddresses: arrEmails,
-					phoneNumbers: arrPhoneNumber,
-					biographies: arrNotes,
-				}
-			}, async (err, res) => {
-				if (err) console.error('The API returned an error: ' + err);
-				else {
-				  await contactMappingService.createContactMapping({
-					 itemID,
-					 resourceName: res.data.resourceName,
-					 etag: res.data.etag
-				   });
-				}
-			});
-			boardItemIndex++;
-		}
+		let columnValuesIndex = 0,
+        currentItem = boardItems[boardItemIndex],
+        name = currentItem.name,
+        arrName = name.split(" ", 2);
+
+    let { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
+    await service.people.createContact({
+      requestBody: {
+        names: [
+          {
+            displayName: name,
+            familyName: arrName[1],
+            givenName: arrName[0]
+          },
+        ],
+        emailAddresses: arrEmails,
+        phoneNumbers: arrPhoneNumber,
+        biographies: arrNotes,
+      }
+    }, async (err, res) => {
+      if (err) console.error('The API returned an error: ' + err);
+      else {
+        await contactMappingService.createContactMapping({
+         itemID,
+         resourceName: res.data.resourceName,
+         etag: res.data.etag
+         });
+      }
+    });
+    boardItemIndex++;
 	}
 	return null;
 }
@@ -172,116 +136,79 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
  */
 async function syncWithExistingContacts(boardItems){   //updates existing database.
 	console.log("I made it to syncExistingContatcs");
-  let boardItemIndex = 0;
-	let doConfig = true;
+  boardItemIndex = 1;
 	
 	while(boardItemIndex < boardItems.length) {
 		if((boardItemIndex + 1) % 14 == 0) {
 			await sleep(20000);
 		}
-		
+
 		let columnValuesIndex = 0, currentItem = boardItems[boardItemIndex], name = currentItem.name;
-		let arrName = name.split(" ", 2), arrEmails = [], arrPhoneNumber = [], arrNotes = [], itemID = '';
-		
-		if(doConfig == true) {
-			let columnIdConfig = [];
-			if (!(fs.existsSync("./config.json"))) {
-        
-				columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
-				let config = {"columnIds" : columnIdConfig,
-					"settings":
-						{
-							"createNewDatabase": false
-						}
-				};
-				await setConfigVariables(config)
-				fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-            if (err) return err;
-            console.log('config stored to ./config.json');
-				});
-      } else {
-				  let config = await fs.readFileSync("./config.json");
-				  config = await JSON.parse(config); 
-        
-				  columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
-				
-				  config.columnIds = columnIdConfig;
-				  config.settings.createNewDatabase = false;
-				
-				  await setConfigVariables(config)
-	
-          fs.writeFile("./config.json", JSON.stringify(config), (err) => {
-              if (err) return err;
-              console.log('config.json updated');
+		let arrName = name.split(" ", 2);
+    
+    let { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
+    itemMapping = await contactMappingService.getContactMapping(itemID);
+    
+    if(itemMapping == null) {
+      await service.people.createContact({
+        requestBody: {
+          names: [
+            {
+              displayName: name,
+              familyName: arrName[1],
+              givenName: arrName[0]
+            },
+          ],
+          emailAddresses: arrEmails,
+          phoneNumbers: arrPhoneNumber,
+          biographies: arrNotes,
+        }
+      }, async (err, res) => {
+        if (err) console.error('The API returned an error: hi' + err);
+        else {
+          await contactMappingService.createContactMapping({
+            itemID,
+            resourceName: res.data.resourceName,
+            etag: res.data.etag
           });
-			}
-			doConfig = false;
-		} else {
+        }
+      });
+    } else {
+      service.people.get({
+        resourceName: itemMapping.dataValues.resourceName,
+        personFields: 'metadata',
+      }, async (err, res) => {
+           if(err) return console.error('The API returned an error: ' + err);
+           else {
+             update = await contactMappingService.updateContactMapping(itemID, {resourceName: res.data.resourceName, etag: res.data.etag});
+             updatedMapping = itemMapping = await contactMappingService.getContactMapping(itemID);
       
-			const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables);
-			itemMapping = await contactMappingService.getContactMapping(itemID);
-      
-			if(itemMapping == null) {
-				await service.people.createContact({
-					requestBody: {
-						names: [
-							{
-								displayName: name,
-								familyName: arrName[1],
-								givenName: arrName[0]
-							},
-						],
-						emailAddresses: arrEmails,
-						phoneNumbers: arrPhoneNumber,
-						biographies: arrNotes,
-					}
-				}, async (err, res) => {
-					if (err) console.error('The API returned an error: hi' + err);
-					else {
-						await contactMappingService.createContactMapping({
-							itemID,
-							resourceName: res.data.resourceName,
-							etag: res.data.etag
-						});
-					}
-				});
-			} else {
-				service.people.get({
-					resourceName: itemMapping.dataValues.resourceName,
-					personFields: 'metadata',
-				}, async (err, res) => {
-					   if(err) return console.error('The API returned an error: ' + err);
-					   else {
-					     update = await contactMappingService.updateContactMapping(itemID, {resourceName: res.data.resourceName, etag: res.data.etag});
-					     updatedMapping = itemMapping = await contactMappingService.getContactMapping(itemID);
-				
-					     await service.people.updateContact({
-						    resourceName: updatedMapping.dataValues.resourceName,
-						    sources: 'READ_SOURCE_TYPE_CONTACT',
-						    updatePersonFields: 'biographies,emailAddresses,names,phoneNumbers',
-						    requestBody: {
-							     etag: updatedMapping.dataValues.etag,	
-							     names: [
-							 	    {
-									     givenName: arrName[0],
-									     familyName: arrName[1],
-								    },
-							    ],
-							    emailAddresses:arrEmails,
-							    phoneNumbers: arrPhoneNumber,
-							    biographies: arrNotes,
-						    } 
-					    }, async (err, res) => { 
-							     if (err) console.error('The API returned an error: ' + err);
-							     else {
-								  await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});	
-							 }
-						});
-					}
-				});
-			}
-			boardItemIndex++;
-		}
+             await service.people.updateContact({
+              resourceName: updatedMapping.dataValues.resourceName,
+              sources: 'READ_SOURCE_TYPE_CONTACT',
+              updatePersonFields: 'biographies,emailAddresses,names,phoneNumbers',
+              requestBody: {
+                 etag: updatedMapping.dataValues.etag,	
+                 names: [
+                  {
+                     givenName: arrName[0],
+                     familyName: arrName[1],
+                  },
+                ],
+                emailAddresses:arrEmails,
+                phoneNumbers: arrPhoneNumber,
+                biographies: arrNotes,
+              } 
+            }, async (err, res) => { 
+                 if (err) console.error('The API returned an error: ' + err);
+                 else {
+                await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});	
+             }
+          });
+        }
+      });
+    }
+    boardItemIndex++;
 	}
 	return null;
 }
@@ -292,6 +219,56 @@ async function syncWithExistingContacts(boardItems){   //updates existing databa
 
 
 //FUNCTIONS GO HERE
+/**
+ * Sets up config.json when config.json does not exist. Else it reads the values in config.json
+ * @param boardItems - an array of objects that contain the information for each contact.
+ * @returns 0 for success, or 1 for error
+ */
+async function initializeConfig(boardItems) {
+	try {
+		const boardItemIndex = 0; //pointer for how far into the board to look; which item is being checked
+		//Index 0 is the 'headers' of the board - has the column names like "Mobile Phone", "Email - Primary", etc.
+		let columnIdConfig = [],
+      currentItem = boardItems[boardItemIndex]; //container for the current' columns IDs (see above)
+
+
+		if (!(fs.existsSync(conf))) {
+			columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig);
+			const config = {
+				"columnIds" : columnIdConfig,
+				"settings": {
+					"createNewDatabase": false
+					}
+			};
+			await setConfigVariables(config)
+			fs.writeFile(conf, JSON.stringify(config), (err) => {
+				if (err) { return err; }
+					console.log('config has been stored');
+			});
+
+		} else {
+			let config = await fs.readFileSync(conf);
+			config = await JSON.parse(config);
+			columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex);
+			config.columnIds = columnIdConfig;
+			config.settings.createNewDatabase = false;
+			
+			await setConfigVariables(config)
+
+			fs.writeFile(conf, JSON.stringify(config), (err) => {
+			if (err) return err;
+			console.log('config has been updated');
+			});
+		}
+
+		return null;
+	} catch(err) {
+		console.error("The initial board configuration has failed: ");
+		console.error(err);
+		return 1; //Error has occured - TODO: handle in function call 
+	}
+}
+
 function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
   const validTitles = [
     process.env.WORK_PHONE_TITLE,
@@ -322,9 +299,9 @@ function getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex ) {
   
 
 function parseColumnValues(currentItem, configVariables) {
-  const arrEmails = [];
-  const arrPhoneNumber = [];
-  const arrNotes = [];
+  let arrEmails = [];
+  let arrPhoneNumber = [];
+  let arrNotes = [];
   let itemID = null;
 
   for (const currentColumn of currentItem.column_values) {
