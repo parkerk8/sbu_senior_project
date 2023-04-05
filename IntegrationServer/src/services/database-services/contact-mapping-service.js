@@ -17,7 +17,7 @@ const createContactMapping = async (attributes) => {
   console.log('I made it to createContactMapping.js')
   const { itemID, resourceName, etag } = attributes
   try {
-    const newContactMapping = await ContactMapping.create({
+    await ContactMapping.create({
       id: itemID, // PrimaryKey - this should match monday.com itemID field for each contact
       resourceName, // datatype Column - e.g. "Primary Email".
       etag // Column content - e.g. "someone@email.com"
@@ -50,11 +50,11 @@ const updateContactMapping = async (itemID, updates) => {
 const deleteDatabse = async () => {
   console.log('I made it to deleteDatabase.')
   try {
-	  await ContactMapping.destroy( // Sequilize command with options set up to delete ALL data from ContactMapping
-      {
-        where: {}, // Field to specify what to delete - empty for all
-        truncate: true // option description from Sequilize.org: "[options.truncate=false]" "If set to true, dialects that support it will use TRUNCATE instead of DELETE FROM. If a table is truncated the where and limit options are ignored"
-      }
+    // Sequilize command with options set up to delete ALL data from ContactMapping
+	    await ContactMapping.destroy({
+      where: {}, // Field to specify what to delete - empty for all
+      truncate: true // option description from Sequilize.org: "[options.truncate=false]" "If set to true, dialects that support it will use TRUNCATE instead of DELETE FROM. If a table is truncated the where and limit options are ignored"
+    }
     )
   } catch (err) {
     console.error(err)

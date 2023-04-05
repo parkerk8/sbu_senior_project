@@ -60,5 +60,10 @@
 			".env",
 			"src/"
 		]
-	}
+	},
+  "standard": {
+    "ignore": [
+      "test/"
+    ]
+  }
 }

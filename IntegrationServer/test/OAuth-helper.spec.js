@@ -10,18 +10,18 @@ const { errorHandler } = require('../src/middleware/error-handler');
 
 describe('API OAuth-helper Routes', () => {
   const app = express();
-  
+
   before(() => {
     app.use(express.json());
     app.use(router);
   });
-  
+
   describe('GET /auth', () => {
     it('should return a 200 status code', async () => {
       const res = await request(app).get('/auth');
       expect(res.status).to.equal(200);
     }).timeout(300000);
-    
+
     it('should call the authRequestMiddleware middleware', async () => {
       let middlewareCalled = false;
       app.use('/auth', (req, res, next) => {
@@ -31,7 +31,7 @@ describe('API OAuth-helper Routes', () => {
       await request(app).get('/auth');
       expect(middlewareCalled).to.be.true;
     });
-    
+
     it('should call the setUpOAuth function', async () => {
       let functionCalled = false;
       app.use('/auth', (req, res, next) => {
@@ -44,13 +44,13 @@ describe('API OAuth-helper Routes', () => {
       expect(functionCalled).to.be.true;
     });
   });
-  
+
   describe('GET /tokenHandle', () => {
     it('should return a 200 status code', async () => {
       const res = await request(app).get('/tokenHandle');
       expect(res.status).to.equal(200);
     });
-    
+
     it('should call the authRequestMiddleware middleware', async () => {
       let middlewareCalled = false;
       app.use('/tokenHandle', (req, res, next) => {
@@ -60,7 +60,7 @@ describe('API OAuth-helper Routes', () => {
       await request(app).get('/tokenHandle');
       expect(middlewareCalled).to.be.true;
     });
-    
+
     it('should call the codeHandle function', async () => {
       let functionCalled = false;
       app.use('/tokenHandle', (req, res, next) => {
@@ -71,9 +71,9 @@ describe('API OAuth-helper Routes', () => {
       });
       await request(app).get('/tokenHandle');
       expect(functionCalled).to.be.true;
-    });    
+    });
   });
-  
+
   describe('Error handling', () => {
     it('should call the errorHandler middleware', async () => {
       let middlewareCalled = false;

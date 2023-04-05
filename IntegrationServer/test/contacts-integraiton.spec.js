@@ -1,4 +1,4 @@
-/*const chai = require('chai');
+/* const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 const express = require('express');
@@ -94,9 +94,9 @@ describe('Router', () => {
       const req = {};
       const res = { sendStatus: sinon.spy() };
       const next = sinon.spy();
-      
+
       await router.handle({ method: 'post', url: '/sync', body: {} }, res, next);
-      
+
       expect(spy.calledOnce).to.be.true;
       expect(res.sendStatus.calledOnceWith(200)).to.be.true;
       expect(next.notCalled).to.be.true;

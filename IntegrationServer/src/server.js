@@ -37,8 +37,8 @@ if (run === 'Dev') { // custom tunnel - currently set for loca.lt (localTunnel; 
   })
 } else { // replit
   // Tell the app to listen at port, and then create a tunnel.
-  app.listen(port, () => { // Request replit to use a specific port for node.js to run on.
-    (`Listening on port: ${port}`) // replit has its own stuff for node.js setups which run automatically when started.
+  const server = app.listen(port, () => { // Request replit to use a specific port for node.js to run on.
+    console.log(`Listening on port: ${port}`) // replit has its own stuff for node.js setups which run automatically when started.
   })
 }
 

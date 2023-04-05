@@ -2,12 +2,12 @@ const { google } = require('googleapis')
 const fs = require('fs')
 const NodeCache = require('node-cache')
 const myCache = new NodeCache({ stdTTL: 1000, useClones: false })
-const express = require('express');
-const app = express();
+const express = require('express')
+const app = express()
 
 app.get('/callback', async (req, res) => {
-  await codeHandle(req, res);
-});
+  await codeHandle(req, res)
+})
 
 const OAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -30,63 +30,68 @@ google.options({ auth: OAuth2Client })
  * @returns The a redirect to URL to the Google OAuth2 page, or a redirect back to Monday.com.
  */
 async function setUpOAuth (req, res) {
-  console.log('I made it to setUpOauth.js')
-  if (fs.existsSync('./token.json')) {
-	   const TOKEN_PATH = './token.json'
-    fs.readFile('./token.json', (err, token) => {
+  const TOKEN_PATH = './token.json'
+  if (fs.existsSync(TOKEN_PATH)) {
+    fs.readFile(TOKEN_PATH, (err, token) => {
       if (err) {
-				    console.error(err)
-				    return
-			  }
+        console.error(err)
+        return
+      }
       OAuth2Client.credentials = JSON.parse(token)
-			  const returnUrl = req.session.backToUrl
-			  return res.redirect(returnUrl)
+      const returnUrl = req.session.backToUrl
+      return res.redirect(returnUrl)
     })
   } else {
-	    myCache.set('returnURl', req.session.backToUrl)
-	    const url = OAuth2Client.generateAuthUrl({
-      // 'online' (default) or 'offline' (gets       refresh_token)
-		      access_type: 'offline',
+    myCache.set('returnURl', req.session.backToUrl)
+    const url = OAuth2Client.generateAuthUrl({
+      // 'online' (default) or 'offline' (gets refresh_token)
+      access_type: 'offline',
       // If you only need one scope you can pass it as a string
-		      scope: SCOPES
-	    })
-	    return res.redirect(url)
-	  }
+      scope: SCOPES
+    })
+    return res.redirect(url)
+  }
 }
 
-async function codeHandle(req, res) {
+async function codeHandle (req, res) {
   // Creates a new token or detects if a token already exists
-  backToUrl = myCache.get('returnURl');
-  if (backToUrl == undefined) {
-    return res.status(200).send({});
-  } else {
-    myCache.del('returnURl');
+  const backToUrl = myCache.get('returnURl')
+  if (backToUrl) {
+    myCache.del('returnURl')
     if (!fs.existsSync('./token.json')) {
-      const TOKEN_PATH = './token.json';
-      const code = req.query.code;
-      console.log(code);
+      const TOKEN_PATH = './token.json'
+      const code = req.query.code
+      console.log(code)
 
       OAuth2Client.getToken(code, (err, token) => {
         if (err) {
-          return console.error('Error retrieving access token', err);
+          console.error('Error retrieving access token', err)
+          return res.redirect(backToUrl)
         }
-        OAuth2Client.credentials = token;
-        console.log(token);
+        OAuth2Client.credentials = token
+        console.log(token)
         fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-          if (err) return console.error(err);
-          console.log('Token stored to', TOKEN_PATH);
-        });
-        // Store the token to disk for later program executions
-        res.redirect(backToUrl); // redirect the user
-      });
+          if (err) {
+            console.error(err)
+            return res.redirect(backToUrl)
+          }
+          console.log('Token stored to', TOKEN_PATH)
+          // Store the token to disk for later program executions
+          res.redirect(backToUrl) // redirect the user
+        })
+      })
     } else {
-      const TOKEN_PATH = './token.json';
       fs.readFile('./token.json', (err, token) => {
-        if (err) return console.error(err);
-        OAuth2Client.credentials = JSON.parse(token);
-        res.redirect(backToUrl); // redirect the user
-      });
+        if (err) {
+          console.error(err)
+          return res.redirect(backToUrl)
+        }
+        OAuth2Client.credentials = JSON.parse(token)
+        res.redirect(backToUrl) // redirect the user
+      })
     }
+  } else {
+    return res.status(200).send({})
   }
 }
 

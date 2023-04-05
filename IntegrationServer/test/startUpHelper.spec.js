@@ -1,5 +1,5 @@
 const fs = require('fs').promises
-const mock = require('mock-fs');
+const mock = require('mock-fs')
 const sinon = require('sinon')
 const chai = require('chai')
 const expect = chai.expect
@@ -13,12 +13,12 @@ describe('startup-helper.js', () => {
     let fsReadFileStub
     let credentialsStub
 
-  beforeEach(() => {
-    fsReadFileStub = sinon.stub(fs, 'readFile')
-    credentialsStub = { access_token: "ACCESS_TOKEN" }
-    sinon.stub(googleAuth.OAuthClient, 'credentials').get(() => credentialsStub.credentials)
-  })
-  
+    beforeEach(() => {
+      fsReadFileStub = sinon.stub(fs, 'readFile')
+      credentialsStub = { access_token: 'ACCESS_TOKEN' }
+      sinon.stub(googleAuth.OAuthClient, 'credentials').get(() => credentialsStub.credentials)
+    })
+
     afterEach(() => {
       fsReadFileStub.restore()
     })
@@ -45,15 +45,15 @@ describe('startup-helper.js', () => {
     })
 
     it('should log an error when there is an error reading the token file', async () => {
-        const error = { code: 'SOME_ERROR' }
-        fsReadFileStub.rejects(error)
-        const consoleErrorSpy = sinon.spy(console, 'error')
-  
-        await startupHelper.setOAuthCredentials()
-  
-        expect(consoleErrorSpy.calledWith('Error reading token file: ', error)).to.be.true
-  
-        consoleErrorSpy.restore()
+      const error = { code: 'SOME_ERROR' }
+      fsReadFileStub.rejects(error)
+      const consoleErrorSpy = sinon.spy(console, 'error')
+
+      await startupHelper.setOAuthCredentials()
+
+      expect(consoleErrorSpy.calledWith('Error reading token file: ', error)).to.be.true
+
+      consoleErrorSpy.restore()
     })
   })
 
@@ -62,8 +62,8 @@ describe('startup-helper.js', () => {
     let setConfigVariablesStub
 
     beforeEach(() => {
-       fsReadFileStub = sinon.stub(fs, 'readFile')
-       setConfigVariablesStub = { someConfig: 'SOME_CONFIG' }
+      fsReadFileStub = sinon.stub(fs, 'readFile')
+      setConfigVariablesStub = { someConfig: 'SOME_CONFIG' }
     })
 
     afterEach(() => {
@@ -72,13 +72,13 @@ describe('startup-helper.js', () => {
 
     // TODO: Get the test to work
     it('should load config variables when config file is found', async () => {
-      const config = { someConfig: 'SOME_CONFIG' };
+      const config = { someConfig: 'SOME_CONFIG' }
       fsReadFileStub.resolves(JSON.stringify(config))
 
       await startupHelper.loadConfigVariables()
 
       expect(setConfigVariablesStub).to.deep.equal(config)
-    });
+    })
 
     it('should log a message when config file is not found', async () => {
       const error = { code: 'ENOENT' }
@@ -107,24 +107,24 @@ describe('startup-helper.js', () => {
 })
 
 // Non-functional tests
-describe('setOAuthCredentials', function() {
-  it('should complete within 1 second', async function() {
-    this.timeout(1000);
-    const startTime = new Date().getTime();
-    await startupHelper.setOAuthCredentials();
-    const endTime = new Date().getTime();
-    const elapsedTime = endTime - startTime;
-    expect(elapsedTime).to.be.lessThan(1000);
-  });
-});
+describe('setOAuthCredentials', function () {
+  it('should complete within 1 second', async function () {
+    this.timeout(1000)
+    const startTime = new Date().getTime()
+    await startupHelper.setOAuthCredentials()
+    const endTime = new Date().getTime()
+    const elapsedTime = endTime - startTime
+    expect(elapsedTime).to.be.lessThan(1000)
+  })
+})
 
-describe('loadConfigVariables', function() {
-  it('should complete within 1 second', async function() {
-    this.timeout(1000);
-    const startTime = new Date().getTime();
-    await startupHelper.loadConfigVariables();
-    const endTime = new Date().getTime();
-    const elapsedTime = endTime - startTime;
-    expect(elapsedTime).to.be.lessThan(1000);
-  });
-});
+describe('loadConfigVariables', function () {
+  it('should complete within 1 second', async function () {
+    this.timeout(1000)
+    const startTime = new Date().getTime()
+    await startupHelper.loadConfigVariables()
+    const endTime = new Date().getTime()
+    const elapsedTime = endTime - startTime
+    expect(elapsedTime).to.be.lessThan(1000)
+  })
+})

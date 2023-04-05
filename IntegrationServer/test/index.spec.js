@@ -7,20 +7,22 @@ const app = express()
 
 app.use('/', router)
 
-const expect = require('chai').expect;
-const http = require('http');
+const expect = require('chai').expect
+const http = require('http')
 
 // Create a new class that extends the http.ServerResponse class
 class MockResponse extends http.ServerResponse {
-  constructor() {
-    super({ method: '', url: '' });
-    this.headers = {};
+  constructor () {
+    super({ method: '', url: '' })
+    this.headers = {}
   }
-  setHeader(name, value) {
-    this.headers[name] = value;
+
+  setHeader (name, value) {
+    this.headers[name] = value
   }
-  getHeader(name) {
-    return this.headers[name];
+
+  getHeader (name) {
+    return this.headers[name]
   }
 }
 
@@ -36,16 +38,16 @@ describe('router', function () {
   })
 
   it('error handling middleware should handle errors thrown by routes', function (done) {
-    let req = {}
-    let res = {
+    const req = {}
+    const res = {
       status: function () { },
       send: function () { }
     }
-    let next = function (err) {
+    const next = function (err) {
       expect(err.message).to.equal('Test error')
       done()
     }
-  
+
     // Pass an error object to the error handling middleware
     next(new Error('Test error'))
   })
