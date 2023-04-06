@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const rateLimiterUsingThirdParty = require('../middleware/rateLimiter.js');
 
 const makeContact = require('../featureControl/make-contact.js').makeNewContact;   
 const updateContact = require('../featureControl/update-contact.js').updateContactInfo;
 const authenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
 const {populateContacts} = require('../featureControl/sync-contacts.js');
+
+router.use(rateLimiterUsingThirdParty);
 //get the required functions to use. 
 console.log("I made it to contacts-intergrations.js route");
 //when a post request is sent to /create, then first run it threw the authentication, then if that passes, move it on into the actual function. 
