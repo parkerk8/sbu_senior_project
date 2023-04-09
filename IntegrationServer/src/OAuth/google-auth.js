@@ -6,6 +6,8 @@ const router = express.Router();
 const NodeCache = require( "node-cache" );
 const myCache = new NodeCache( { stdTTL: 1000, useClones: false});
 
+console.log("I made it to google-oauth.js");
+
 let { configVariables } = require('../config/config-helper.js');
 
 const OAuth2Client = new google.auth.OAuth2(
@@ -18,9 +20,7 @@ const OAuth2Client = new google.auth.OAuth2(
 
 
 // Declares the necessary scopes from Google
-const scopes = [
-	'https://www.googleapis.com/auth/contacts'
-	];
+const SCOPES = ['https://www.googleapis.com/auth/contacts'];
 
 
 google.options({auth: OAuth2Client});
@@ -32,46 +32,47 @@ google.options({auth: OAuth2Client});
  * @param res - The response object.
  * @returns The a redirect to URL to the Google OAuth2 page, or a redirect back to Monday.com.
  */
-function setUpOAuth (req, res) {	
-	if (fs.existsSync("./token.json")) 
-	{
-		const TOKEN_PATH = "./token.json"
-        fs.readFile("./token.json", (err, token) => {
-            if (err)
-			{
-				console.error(err);
-				return;
-			}
-            OAuth2Client.credentials = JSON.parse(token);;
-			let returnUrl = req.session.backToUrl;
-			return res.redirect(returnUrl);
-        });
-	}
-	else
-	{
-	myCache.set("returnURl", req.session.backToUrl);
-	
-	let url = OAuth2Client.generateAuthUrl({
-		access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token)
-		scope: scopes 			// If you only need one scope you can pass it as a string
-	});
-	return res.redirect(url);
-	}
-}
+async function setUpOAuth (req, res) {	
+  console.log("I made it to setUpOauth.js");
+	if (fs.existsSync("./token.json")) {
+	  const TOKEN_PATH = "./token.json"
+    fs.readFile("./token.json", (err, token) => {
+        if (err) {
+				    console.error(err);
+				    return;
+			  }
+        OAuth2Client.credentials = JSON.parse(token);;
+			  let returnUrl = req.session.backToUrl;
+			  return res.redirect(returnUrl);
+    });
+	} else {
+	    myCache.set("returnURl", req.session.backToUrl);
+	    let url = OAuth2Client.generateAuthUrl({
+          // 'online' (default) or 'offline' (gets       refresh_token)
+		      access_type: 'offline',
+          // If you only need one scope you can pass it as a string
+		      scope: SCOPES	
+	    });
+	    return res.redirect(url);
+	  }
+  }
 
-function codeHandle (req, res) {
+async function codeHandle (req, res) {
 	//Creates a new token or detects if a token already exists
+  console.log("I made it to token-store-permissions.js");
 	backToUrl = myCache.get("returnURl");
-	if(backToUrl == undefined) return res.status(200).send({});
-	else{
-	myCache.del("returnURl");	
-    if (!(fs.existsSync("./token.json"))) {
-        const TOKEN_PATH = "./token.json"
-        const code = req.query['code'];
-        console.log(code);
+	if(backToUrl == undefined) 
+      return res.status(200).send({});
+	else {
+	    myCache.del("returnURl");	
+      if (!(fs.existsSync("./token.json"))) {
+            const TOKEN_PATH = "./token.json"
+            const code = req.query['code'];
+            console.log(code);
  
-        OAuth2Client.getToken(code, (err, token) => {
-            if (err) return console.error('Error retrieving access token', err);
+            OAuth2Client.getToken(code, (err, token) => {
+            if (err) 
+              return console.error('Error retrieving access token', err);
             OAuth2Client.credentials = token;
             console.log(token);
             fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
