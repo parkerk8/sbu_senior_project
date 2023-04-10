@@ -34,27 +34,33 @@ google.options({auth: OAuth2Client});
  */
 async function setUpOAuth (req, res) {	
   console.log("I made it to setUpOauth.js");
-	try {
-    const token = await fs.readFile("./token.json");
-    OAuth2Client.credentials = JSON.parse(token);
-		let returnUrl = req.session.backToUrl;
-		return res.redirect(returnUrl);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      console.error("Error reading token file: ", err);
-      return res.status(500).send({});
-    } else {   
-      console.log("No token found");
-      myCache.set("returnURl", req.session.backToUrl);
-	    let url = OAuth2Client.generateAuthUrl({
-          // 'online' (default) or 'offline' (gets       refresh_token)
-		      access_type: 'offline',
-          // If you only need one scope you can pass it as a string
-		      scope: SCOPES	
-	    });
-	    return res.redirect(url);
+	const TOKEN_PATH = "./token.json";
+  fs.promises.access(TOKEN_PATH, fs.constants.F_OK)
+  .then(() => {
+    fs.promises.readFile(TOKEN_PATH)
+      .then(token => {
+        OAuth2Client.credentials = JSON.parse(token);;
+        const returnUrl = req.session.backToUrl;
+        return res.redirect(returnUrl);
+      })
+      .catch(err => {
+        console.error(err);
+        return res.status(500).send();
+      });
+  })
+  .catch(() => {
+    myCache.set("returnURl", req.session.backToUrl);
+    try {
+      const url = OAuth2Client.generateAuthUrl({
+        access_type: "offline",
+        scope: SCOPES
+      });
+      return res.redirect(url);
+    } catch (err) {
+      console.error("The URL could not be generated", err);
+      return res.status(500).send();
     }
-  }
+  }); 
 }
 
 async function codeHandle (req, res) {
@@ -62,37 +68,33 @@ async function codeHandle (req, res) {
   console.log("I made it to token-store-permissions.js");
 	backToUrl = myCache.get("returnURl");
 	if(backToUrl == undefined) {
-      return res.status(200).send({});
+    return res.status(200).send({});
   } else {
     myCache.del("returnURl");	
-    try {
-      const TOKEN_PATH = await fs.readFile("./token.json");
-      OAuth2Client.credentials = JSON.parse(token);
-      return res.redirect(backToUrl);
-    } catch (err) {
-      if (err.code === 'ENOENT') {
-        console.error("Error reading token file: ", err);
-      } else {
-        const TOKEN_PATH = "./token.json"
-        const code = req.query['code'];
-        console.log(code);
-    
-        OAuth2Client.getToken(code, (err, token) => {
-        if (err) 
-          return console.error('Error retrieving access token', err);
+    const TOKEN_PATH = "./token.json";
+    fs.promises.access(TOKEN_PATH, fs.constants.F_OK)
+    .then(() => {
+      fs.readFile(TOKEN_PATH, (err, token) => {
+        if (err) return console.error(err);
+        OAuth2Client.credentials = JSON.parse(token);
+        return res.redirect(backToUrl);
+      });
+    })
+    .catch(() => {
+      const code = req.query["code"];
+      console.log(code);
+      OAuth2Client.getToken(code, (err, token) => {
+        if (err) return console.error("Error retrieving access token", err);
         OAuth2Client.credentials = token;
         console.log(token);
         fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-            if (err) return console.error(err);
-            console.log('Token stored to', TOKEN_PATH);
+          if (err) return console.error(err);
+          console.log("Token stored to", TOKEN_PATH);
         });
-        //Store the token to disk for later program executions
-        });
-        return res.redirect(backToUrl);
-      }
-    
-    }
-	}
+      });
+      return res.redirect(backToUrl);
+    });
+  }
 }
 
 module.exports = {
