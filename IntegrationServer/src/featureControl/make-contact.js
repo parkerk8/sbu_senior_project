@@ -6,7 +6,7 @@ const service = google.people( {version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-const {configVariables} = require('../config/config-helper.js');
+const { getConfigVariables } = require('../config/config-helper.js');
 
 async function makeNewContact(req, res) {
   try {

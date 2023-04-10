@@ -44,7 +44,7 @@ describe('API endpoints', function () {
 it('should correctly load OAuth credentials from a file', function () {
   // Create a temporary token file with some credentials
   const fs = require('fs')
-  const token = { access_token: '949681890895-kaoot1p07us43e1pqlrcu7li4t6vhous.apps.googleusercontent.com', refresh_token: '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', expires_in: 3600 }
+  const token = { access_token: '.apps.googleusercontent.com', refresh_token: 'GOCSPX-', expires_in: 3600 }
   fs.writeFileSync('../token.json', JSON.stringify(token))
 
   // Call the setOAuthCredentials function
