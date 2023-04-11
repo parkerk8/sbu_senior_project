@@ -78,7 +78,7 @@ async function fetchContacts (req, res) {
  * @returns null.
  */
 async function initalSetupGoogleContacts (boardItems) { // makes new database.
-  lboardItemIndex = 1
+  boardItemIndex = 0
 
   await contactMappingService.deleteDatabse()
   console.log(boardItems.length)
@@ -131,7 +131,7 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
  */
 async function syncWithExistingContacts (boardItems) { // updates existing database.
   console.log('I made it to syncExistingContatcs')
-  let boardItemIndex = 1
+  let boardItemIndex = 0
 
   while (boardItemIndex < boardItems.length) {
     if ((boardItemIndex + 1) % 14 === 0) {

@@ -5,7 +5,7 @@ const rateLimiterUsingThirdParty = require('../middleware/rateLimiter.js');
 const makeContact = require('../featureControl/make-contact.js').makeNewContact;   
 const updateContact = require('../featureControl/update-contact.js').updateContactInfo;
 const authenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
-const {populateContacts} = require('../featureControl/sync-contacts.js');
+const {fetchContacts} = require('../featureControl/sync-contacts.js');
 const Mutex = require('async-mutex').Mutex;
 
 const mutex = new Mutex();
@@ -26,7 +26,7 @@ router.post('/update', authenticationMiddleware, async (req, res) => {
 
 router.post('/sync', authenticationMiddleware, async (req, res) => {
   await mutex.runExclusive(async () => {
-    await populateContacts(req, res);
+    await fetchContacts(req, res);
   });
 });
 
