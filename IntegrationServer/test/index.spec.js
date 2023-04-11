@@ -8,35 +8,81 @@ describe('index route', function() {
   beforeEach(function() {
     app.use(router);
   });
-
-  it('should return a 200 response for /contacts-integration route', function(done) {
+  /* Authenticaiton needed for these tests
+  it('should return a 200 response for the /auth route if not authenticated', function(done) {
     request(app)
-      .get('/contacts-integration')
+      .get('/auth')
       .expect(200, done);
   });
-
-  it('should return a JSON response for /contacts-integration route', function(done) {
+  it('should return a JSON response for /auth route', function(done) {
     request(app)
-      .get('/contacts-integration')
-      .expect('Content-Type', "text/html; charset=utf-8")
+      .get('/auth')
+      .expect('Content-Type', "application/json; charset=utf-8")
       .end(function(err, res) {
         if (err) return done(err);
         expect(res.body).to.be.an('object');
         done();
       });
   });
+  */
 
-  it('should return a 429 response for too many requests', function(done) {
-    // Assume that rateLimiterUsingThirdParty middleware is working properly
-    // and limiting requests to 1 per second
+  it('should return a 302 response for the /tokenHandle route', function(done) {
     request(app)
-      .get('/contacts-integration')
-      .expect(200)
+      .get('/tokenHandle')
+      .expect(302, done);
+  });
+
+  it('should return a JSON response for /tokenHandle route', function(done) {
+    request(app)
+      .get('/tokenHandle')
+      .expect('Content-Type', "application/json; charset=utf-8")
       .end(function(err, res) {
         if (err) return done(err);
-        request(app)
-          .get('/contacts-integration')
-          .expect(429, done);
+        expect(res.body).to.be.an('object');
+        done();
       });
   });
+  /* We need to be authenticated for these tests
+ it('should create a new user when POST request is sent to /create', function(done) {
+  request(app)
+    .post('/create')
+    .send({ name: 'John Doe', email: 'johndoe@example.com' })
+    .expect(201)
+    .end(function(err, res) {
+      if (err) return done(err);
+      expect(res.body).to.be.an('object');
+      expect(res.body).to.have.property('name', 'John Doe');
+      expect(res.body).to.have.property('email', 'johndoe@example.com');
+      done();
+    });
+  });
+  /* We need to be authenticated for these tests
+  it('should create a new user when POST request is sent to /update', function(done) {
+    request(app)
+    .post('/update')
+    .send({ name: 'John Doe', email: 'johndoe@example.com' })
+    .expect(201)
+    .end(function(err, res) {
+      if (err) return done(err);
+      expect(res.body).to.be.an('object');
+      expect(res.body).to.have.property('name', 'John Doe');
+      expect(res.body).to.have.property('email', 'johndoe@example.com');
+      done();
+    });
+  });
+  it('should create a new user when POST request is sent to /sync', function(done) {
+    request(app)
+    .post('/sync')
+    .send({ name: 'John Doe', email: 'johndoe@example.com' })
+    .expect(201)
+    .end(function(err, res) {
+      if (err) return done(err);
+      expect(res.body).to.be.an('object');
+      expect(res.body).to.have.property('name', 'John Doe');
+      expect(res.body).to.have.property('email', 'johndoe@example.com');
+      done();
+    });
+  });
+  */
+
 });

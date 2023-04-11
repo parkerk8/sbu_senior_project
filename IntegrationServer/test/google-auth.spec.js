@@ -3,6 +3,7 @@ const fs = require('fs')
 const chai = require('chai')
 const expect = chai.expect
 const sinon = require('sinon')
+const google = require('googleapis');
 const OAuth2Client = require('google-auth-library').OAuth2Client
 const googleAuth = require('../src/OAuth/google-auth.js')
 const chaiSinon = require('sinon-chai')
@@ -124,37 +125,51 @@ describe('setUpOAuth', () => {
 })
 
 // CODEHANDLE UNIT TESTS
-// CODEHANDLE UNIT TESTS
-describe('codeHandle', function () {
-  const req = { query: { code: 'http://example.com' } }
-  const res = { redirect: sinon.stub(), status: sinon.stub(), send: sinon.stub() }
-  const SCOPES = ['https://www.googleapis.com/auth/contacts']
-  const TOKEN_PATH = './token.json'
+describe('codeHandle', function() {
+  let req, res, sandbox;
 
-  beforeEach(() => {
-    sinon.restore()
-    sinon.stub(OAuth2Client.prototype, 'generateAuthUrl').returns('http://example.com/tokenHandle')
-    sinon.stub(fs, 'existsSync').returns(false)
-    sinon.stub(fs, 'readFile').returnsThis()
-  })
+  beforeEach(function() {
+    sandbox = sinon.createSandbox();
+    req = {
+      query: { code: 'some-code' },
+      session: { backToUrl: 'http://localhost:3000/callback' }
+    };
+    res = { 
+      status: sinon.spy(),
+      send: sinon.spy(),
+      redirect: sinon.spy() 
+    };
+  });
 
-  afterEach(() => {
-    sinon.restore()
-  })
+  afterEach(function() {
+    sandbox.restore();
+  });
 
-  it('should return an empty object with a 200 status code if there is no return URL', async function () {
-    // arrange
-    sinon.stub(myCache, 'get').returns(undefined)
+  it('should store the token to disk and redirect to backToUrl', async function() {
+    const fsWriteFileStub = sandbox.stub(fs, 'writeFile').callsArgAsync(2);
+    const getTokenStub = sandbox.stub(google.auth.OAuth2.prototype, 'getToken').callsArgWithAsync(1, null, { access_token: 'some-access-token', refresh_token: 'some-refresh-token' });
 
-    // act
-    await codeHandle(req, res)
-    console.log(res.status)
-    // assert
-    expect(res.status.calledWith(200)).to.be.true
-    expect(res.send.calledOnceWith({})).to.be.true
-    expect(myCache.get.calledOnceWith('returnUrl')).to.be.true
+    await codeHandle(req, res);
 
-    // restore the original behavior of the cache.get method
-    myCache.get.restore()
-  })
-})
+    sinon.assert.calledOnce(fsWriteFileStub);
+    sinon.assert.calledWith(fsWriteFileStub, './token.json', '{"access_token":"some-access-token","refresh_token":"some-refresh-token"}', sinon.match.func);
+    sinon.assert.calledOnce(getTokenStub);
+    sinon.assert.calledWith(getTokenStub, 'some-code', sinon.match.func);
+    sinon.assert.calledOnce(res.redirect);
+    sinon.assert.calledWith(res.redirect, 'http://localhost:3000/callback');
+  });
+
+  it('should read the token from disk and redirect to backToUrl', async function() {
+    const readFileStub = sandbox.stub(fs, 'readFile').callsArgWithAsync(1, null, '{"access_token":"some-access-token","refresh_token":"some-refresh-token"}');
+    const setCredentialsStub = sandbox.stub(google.auth.OAuth2.prototype, 'setCredentials');
+    
+    await codeHandle(req, res);
+
+    sinon.assert.calledOnce(readFileStub);
+    sinon.assert.calledWith(readFileStub, './token.json', sinon.match.func);
+    sinon.assert.calledOnce(setCredentialsStub);
+    sinon.assert.calledWith(setCredentialsStub, { access_token: 'some-access-token', refresh_token: 'some-refresh-token' });
+    sinon.assert.calledOnce(res.redirect);
+    sinon.assert.calledWith(res.redirect, 'http://localhost:3000/callback');
+  });
+});
