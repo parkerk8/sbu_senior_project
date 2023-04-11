@@ -222,7 +222,7 @@ async function initializeConfig (boardItems) {
     const currentItem = boardItems[boardItemIndex] // container for the current' columns IDs (see above)
 
     if (!(fs.existsSync(conf))) {
-      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig)
+      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex)
       const config = {
         columnIds: columnIdConfig,
         settings: {
