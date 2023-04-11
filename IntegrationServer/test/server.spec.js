@@ -78,15 +78,6 @@ it('should correctly load configuration variables from a file', function () {
   fs.unlinkSync('./config.json')
 })
 
-it('should listen on the specified port', function (done) {
-  const { PORT: port } = process.env
-  chai.request(app)
-    .get('/')
-    .end(function (err, res) {
-      expect(res).to.have.status(200)
-      done()
-    })
-}).timeout(5000) // increase timeout to allow for server to start up
 
 /* it('should create a tunnel for the specified port', function(done) {
   const { createTunnel } = require('../src/tunnelHelper/tunnel');

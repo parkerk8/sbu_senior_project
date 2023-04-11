@@ -12,6 +12,7 @@
 		"express": "^4.14.0",
 		"express-rate-limit": "^6.7.0",
 		"fs": "0.0.1-security",
+		"google-auth-library": "^8.7.0",
 		"googleapis": "^95.0.0",
 		"http": "^0.0.1-security",
 		"jsonwebtoken": "^9.0.0",
