@@ -1,15 +1,13 @@
 const { ContactMapping } = require('../../db/models'); //Imports command (which extends from sequilize's db Model?) from contactmapping.js (also see ContactMapping.init)
 
-console.log("I made it to contact-mapping-service.js");
-
 // Takes an itemID as an argument, and returns the result of a query to the database.
 const getContactMapping = async (itemID) => { //Database query to find item with matching primary key
-  console.log("I made it to getContactMapping");
   try {
     const queryResult = await ContactMapping.findByPk(itemID); //findByPk is sequilize search command to find a single entry using the PrimaryKey
     return queryResult;
   } catch (err) {
     console.error(err); 
+    throw err;
   }
 };
 

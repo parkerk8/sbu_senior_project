@@ -1,4 +1,4 @@
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
 google.options({auth: OAuth2Client});
 
@@ -6,118 +6,143 @@ const service = google.people( {version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
+const { configVariables } = require('../config/config-helper.js');
 
 
-var {configVariables} = require('../config/config-helper.js'); //Object which setconfigVariables fills in the ID for the elements with a matching column found in the .env's title element. Includes a "createNewDatabase" element within it.
+async function makeNewContact(req, res) {
+  try {
+    //gets the contact info from monday.com
+    const itemMap = req.body.payload.inboundFieldValues.itemMapping;
+    const itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
 
- console.log("I made it to make-contact.js");
-async function makeNewContact(req, res){
-	//gets the contact info from monday.com
-  console.log("I made it to make-contact.js");
-	let itemMap = req.body.payload.inboundFieldValues.itemMapping
-	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
-	
-	let itemMapping = await contactMappingService.getContactMapping(itemID); //Sequilize database. Tries to get itemMapping with the same itemID if it exists for error-handling
+    //Sequilize database. Tries to get itemMapping with the same itemID if it exists for error-handling
+    const itemMapping = await contactMappingService.getContactMapping(itemID);
 
-	if(itemMapping != null) { // if this occurs, there is either an old database-entry with the same itemID somehow, create was called twice, or the itemIDs are repeating.
-		console.log("Mapping already exists: aborting make contact");
-		return res.status(409).send({}); //409 status error: Conflict - see above if statement comment at the if for reason.
-  } else {
-  	let name = itemMap.name; // Get name and the IDs of the Title Fields that exist from contactMappingService
-  	let primaryEmail = itemMap[configVariables.primaryEmailID];
-  	let secondaryEmail = itemMap[configVariables.secondaryEmailID];
-  	let workPhone = itemMap[configVariables.workPhoneId];
-  	let mobilePhone = itemMap[configVariables.mobilePhoneID];
-  	let notes = itemMap[configVariables.notesID];
-  	
-  	//Splits the contact into an array to seperate first name from middle and/or last name - IF they exist - via splitting the name column on any spaces that exist.
-    //DOES NOT AFFECT THE MAIN DISPLAY NAME WHILE VIEWING CONTACT LIST
-  	const nameArr = await name.split(" ", 2); //Possible Issues: first or last names with spaces in them, or a name with more than 3 parts.
-  	
-  	/*if (nameArr.length == 2) {
-  		nameArr[2] = nameArr[1];
-  		nameArr[1] = "";
-  	}*/
-  	
-  	
-  	//Reformat phone number to be a bit nicer if input is regular number-string: "xxx xxx xxxx" (no spaces) =into=> "1 (xxx) xxx-xxxx" (with spaces)
-  	if((workPhone != undefined) && (workPhone.length == 10)) { //Reformat work phone number
-  		console.log("Reformat work-phone: " + workPhone);
-  		workPhone = await '1 ('+ workPhone.slice(0,3) + ') ' +  workPhone.substring(3,6) + '-' + workPhone.substring(6,10);
-  	}
-  	if((mobilePhone != undefined) && (mobilePhone.length == 10)) { //Reformat mobile phone number
-  		console.log("Reformat mobile-phone: " + mobilePhone);
-  		mobilePhone = await '1 ('+ mobilePhone.slice(0,3) + ') ' +  mobilePhone.substring(3,6) + '-' + mobilePhone.substring(6,10);
-  	}
-  	
-  
-  	/*
-  	formatting for organizations feild in contacts, not currrently used. May be changed latter, leaving this here so we don't have to re-find-out how to format this
-  
-  	organizations: [
-  					{
-  						name: updateContact.Company,
-  						title: updateContact.Role,
-  					}
-  				]
-  	*/
-  	//calls the people api to create a contact with any information that has been put into the new contact. Normally should just be the name
-  	await service.people.createContact({
-  		requestBody: {
-  			names: [
-  				{
-  					displayName: name,
-  					familyName: nameArr[2],
-  					givenName: nameArr[0],
-  					middleName: nameArr[1],
-  				},
-  			],
-  			emailAddresses: [
-  					{
-  						value: primaryEmail,
-  						type: 'work',
-  						formattedType: 'Work'
-  					},
-  					{
-  						value: secondaryEmail,
-  						type: 'other',
-  						formattedType: 'Other'
-  					},
-  				],
-  				phoneNumbers: [
-  					{
-  						value: workPhone,
-  						type: 'work',
-  						formattedType: 'Work'
-  					},	
-  					{
-  						value: mobilePhone,
-  						type: 'mobile',
-  						formattedType: 'Mobile'
-  					},
-  				],
-  				biographies: [
-  					{
-  						value: notes,
-  						contentType: 'TEXT_PLAIN'
-  					}
-  				],
-  		}
-  	}, async (err, res) => { 
-  			if (err) return console.error('The API returned an error: ' + err)				
-  			await contactMappingService.createContactMapping({
-  				itemID,
-  				resourceName: res.data.resourceName, 
-  				etag: res.data.etag
-  			});	
-  		} 
-  	);
-  	return res.status(200).send({});
-	}
+    if (itemMapping != null) { //Check if item with the given ID alreaady exists
+      console.log("Mapping already exists: aborting make contact");
+      return res.status(200).send({});
+      //if this occurs, there is either an old database-entry with the same itemID somehow. e.g. create was called twice, or the itemIDs are repeating.
+    } else { //No contact exists
+      const contactRes = makeContact(itemID, itemMap);
+
+      return res.status(200).send({});
+    }
+  } catch (error) {
+    console.error('An error occurred:', error);
+    return res.status(500).send({});
+  }
 };
 
 
+////FUNCTIONS////
+//Rudimentary splitter for names using spaces - missing case for more than 3 spaces.
+async function nameSplit(name) {
+  let nameArr = await name.split(" ");
+
+  //If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
+  switch (nameArr.length == 2) {
+    case 1 :
+        nameArr[1]= "";
+        nameArr[2]= "";
+        break;
+    case 2 :
+        nameArr[2] = nameArr[1];
+        nameArr[1] = "";
+        break;
+    case 3 :
+      break;
+  }
+  return nameArr;
+}
+
+async function phoneFormat(phone) {
+	//Try to format mobile and work phones 
+	if(phone != undefined) {
+		console.log(phone);
+		if(phone.length == 10) {
+			phone = await '1 ('+ phone.slice(0,3) + ') ' +  phone.substring(3,6) + '-' + phone.substring(6,10);
+		}
+	}
+}
+
+async function makeContact(itemID, itemMap) {
+  // Get name and the IDs of the Title Fields that exist from contactMappingService
+  const {
+    primaryEmailID,
+    secondaryEmailID,
+    workPhoneID,
+    mobilePhoneID,
+    notesID,
+  } = configVariables;
+  const name = itemMap.name;
+  const primaryEmail = itemMap[primaryEmailID];
+  const secondaryEmail = itemMap[secondaryEmailID];
+  const notes = itemMap[notesID];
+  let nameArr = await nameSplit(name);
+  let workPhone = await phoneFormat(itemMap[workPhoneID]);
+  let mobilePhone = await phoneFormat(itemMap[mobilePhoneID]);
+
+
+  //calls the people api to create a contact with any information that has been put into the new contact. 
+  //Normally should just be the name
+  const res = await service.people.createContact({
+    requestBody: { //info to push to Google as new contact
+      names: [{
+          displayName: name,
+          familyName: nameArr[2],
+          givenName: nameArr[0],
+          middleName: nameArr[1],
+      }, ],
+      emailAddresses: [{
+          value: primaryEmail,
+          type: 'work',
+          formattedType: 'Work'
+        }, {
+          value: secondaryEmail,
+          type: 'other',
+          formattedType: 'Other'
+      }, ],
+      phoneNumbers: [{
+          value: workPhone,
+          type: 'work',
+          formattedType: 'Work'
+        }, {
+          value: mobilePhone,
+          type: 'mobile',
+          formattedType: 'Mobile'
+      }, ],
+      biographies: [{
+            value: notes,
+            contentType: 'TEXT_PLAIN'
+        } ],
+    } //end request body
+  }, async (err, res) => {
+    if (err) {
+      return console.error('The API returned an error: ' + err)
+    }
+    //Create internal contact mapping for database
+    await contactMappingService.createContactMapping({
+      itemID,
+      resourceName: res.data.resourceName, 
+      etag: res.data.etag
+    });
+  });
+  return 0;
+}
+
+/*
+//WIP - No implemented.
+//Intended for in case functionality with createMappingService is split from the createContact case for readability reasons.
+async function newMapping(itemID, resourceName, etag) {
+  await contactMappingService.createContactMapping({
+    itemID,
+    resourceName: resourceName, 
+    etag: etag
+  });
+}
+*/
+
 
 module.exports = {
-	makeNewContact
+  makeNewContact
 };
