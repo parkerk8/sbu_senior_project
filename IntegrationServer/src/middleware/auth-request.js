@@ -4,6 +4,7 @@ const jswtoken = require('jsonwebtoken'); //get the json webtoken library.
 //some expected information in the request. If it succeeds, it stores some data to the session, and allows the request through, if it fails, the request
 //is stopped.
 async function authRequestMiddleware(req, res, next) {
+  console.log("I made it to authRequestMiddleWare.js");
 	try{
 		let authorization = req.headers.authorization;  //get the authentication info from the request. 
 		if (!authorization && req.query) {

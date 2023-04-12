@@ -17,7 +17,7 @@ const setConfigVariables = require('../config/config-helper.js').setConfigVariab
 
 
 
-var populateLock = true; 
+var populateLock = true;
 //Monday will send a duplicate request if it doesn't get a response in 30 seconds.
 //This is very much an issue with the populate function, which takes far longer than that to execute.
 //This lock varibale is used to prevent multiple sync requests happening simultaniusly 
@@ -29,8 +29,10 @@ var populateLock = true;
  * @param req - The request object
  * @param res - The response object
  */
+console.log("I made it to startup-helper.js");
 async function populateContacts(req, res)
 {
+  console.log("I made it to populateContacts");
 	const boardItems = await getBoardItems(req.session.shortLivedToken, req.body.payload.inputFields.boardID)
 	let {createNewDatabase} = configVariables;
 	console.log("Create new database = " + createNewDatabase);
@@ -90,7 +92,8 @@ async function populateContacts(req, res)
  * @returns null.
  */
 async function initalSetupGoogleContacts(boardItems){   //makes new database.
-	let boardItemIndex = 0;
+  console.log("I made it to the intial contacts.js");	
+  let boardItemIndex = 0;
 	let doConfig = true;
 	
 	await contactMappingService.deleteDatabse();
@@ -257,7 +260,8 @@ async function initalSetupGoogleContacts(boardItems){   //makes new database.
  * @returns null.
  */
 async function syncWithExistingContacts(boardItems){   //updates existing database.
-	let boardItemIndex = 0;
+	console.log("I made it to syncExistingContatcs");
+  let boardItemIndex = 0;
 	let doConfig = true;
 	
 	while(boardItemIndex < boardItems.length)

@@ -1,8 +1,9 @@
 const { ContactMapping } = require('../../db/models');
 
-
+console.log("I made it to contact-mapping-service.js");
 // Takes an itemID as an argument, and returns the result of a query to the database.
 const getContactMapping = async (itemID) => {
+  console.log("I made it to getcontactMapping");
   try {
     const queryResult = await ContactMapping.findByPk(itemID);
     return queryResult;
@@ -12,6 +13,7 @@ const getContactMapping = async (itemID) => {
 };
 
 const createContactMapping = async (attributes) => {
+  console.log("I made it to createContactMapping.js");
 	const {itemID, resourceName, etag} = attributes;
 	try{
 		const newContactMapping = await ContactMapping.create( {
@@ -26,6 +28,7 @@ const createContactMapping = async (attributes) => {
 }
 
 const updateContactMapping = async (itemID, updates) => {
+  console.log("I made it to updateContactMapping");
   const {resourceName, etag} = updates;
   try {
     const updatedContactMapping = await ContactMapping.update(
@@ -43,6 +46,7 @@ const updateContactMapping = async (itemID, updates) => {
 };
 
 const deleteDatabse = async () => {
+  console.log("I made it to delteDatabase.js");
   try {
 	  await ContactMapping.destroy(
       {
