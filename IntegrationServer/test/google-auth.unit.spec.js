@@ -83,7 +83,7 @@ describe('OAuth2Client', function () {
 
 // UNIT TESTS
 describe('setUpOAuth', () => {
-  const req = { session: { backToUrl: 'http://example.com' } }
+  const req = { session: { backToUrl: 'http://example.com/auth' } }
   const res = { redirect: sinon.stub() }
   const SCOPES = ['https://www.googleapis.com/auth/contacts']
   const TOKEN_PATH = './token.json'
@@ -195,34 +195,76 @@ describe('codeHandle function', () => {
     expect(OAuth2Client.credentials.access_token).to.equal('test_token');
     expect(res.redirect.calledWith('https://example.com/')).to.be.true;
   
-    // Clean up the stub functions
-    fs.existsSync.restore();
-    fs.readFileSync.restore();
   });
 
-  it('should store token to file and redirect to backToUrl if token.json file does not exist', async () => {
-    myCache.get.returns('https://example.com/');
-    OAuth2Client.getToken.yields(null, { access_token: 'test_token' });
-  
-    const { codeHandle } = proxyquire('../src/OAuth/google-auth', {
-      'fs': fs,
-      'myCache': myCache,
-      'google-auth-library': {
-        OAuth2Client: sinon.stub().returns(OAuth2Client)
-      }
-    });
-  
-    await codeHandle(req, res);
-  
-    expect(myCache.del.calledOnce).to.be.true;
-    expect(fs.existsSync.calledOnce).to.be.true;
-    expect(OAuth2Client.getToken.calledOnce).to.be.true;
-    expect(fs.writeFileSync.calledOnce).to.be.true;
-    expect(OAuth2Client.credentials.access_token).to.equal('test_token');
-    expect(res.redirect.calledWith('https://example.com/')).to.be.true;
-  
-    // Clean up the stub functions
-    fs.existsSync.restore();
-    fs.writeFileSync.restore();
-  });
 });
+
+ describe('codeHandle function', () => {
+  let req, res, myCache;
+
+  beforeEach(() => {
+    req = {
+      query: {
+        code: 'some-code',
+      },
+    };
+    res = {
+      redirect: sinon.spy(),
+      status: sinon.stub().returns({
+        send: sinon.spy(),
+      }),
+    };
+    myCache = {
+      get: sinon.stub(),
+      del: sinon.spy(),
+    };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it('should store token to file and redirect if token.json file does not exist', async () => {
+    sinon.stub(fs, 'existsSync').returns(false);
+    sinon.stub(fs, 'writeFile').callsFake((path, data, cb) => cb());
+    sinon.stub(OAuth2Client.prototype, 'getToken').callsFake((code, cb) => {
+      cb(null, { access_token: 'some-token' });
+    });
+
+    await codeHandle(req, res, myCache);
+
+    expect(fs.existsSync.calledWith('./token.json')).to.be.true;
+    expect(fs.writeFile.calledOnce).to.be.true;
+    expect(OAuth2Client.prototype.getToken.calledOnce).to.be.true;
+    expect(res.redirect.calledOnce).to.be.true;
+    expect(res.redirect.calledWith(myCache.get('returnURl'))).to.be.true;
+  });
+
+  it('should set up OAuth2 client and redirect if token.json file exists', async () => {
+    sinon.stub(fs, 'existsSync').returns(true);
+    sinon.stub(fs, 'readFile').callsFake((path, cb) => {
+      cb(null, JSON.stringify({ access_token: 'some-token' }));
+    });
+
+    await codeHandle(req, res, myCache);
+
+    expect(fs.existsSync.calledWith('./token.json')).to.be.true;
+    expect(fs.readFile.calledOnce).to.be.true;
+    expect(OAuth2Client.prototype.credentials).to.deep.equal({
+      access_token: 'some-token',
+    });
+    expect(res.redirect.calledOnce).to.be.true;
+    expect(res.redirect.calledWith(myCache.get('returnURl'))).to.be.true;
+  });
+
+  it('should return an empty response if backToUrl is undefined', async () => {
+    myCache.get.returns(undefined);
+
+    await codeHandle(req, res, myCache);
+
+    expect(res.status.calledOnce).to.be.true;
+    expect(res.status.calledWith(200)).to.be.true;
+    expect(res.status().send.calledOnce).to.be.true;
+    expect(res.status().send.calledWith({})).to.be.true;
+  });
+}); 

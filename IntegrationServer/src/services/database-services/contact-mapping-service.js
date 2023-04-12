@@ -24,6 +24,7 @@ const createContactMapping = async (attributes) => {
 	}
 	catch (err) {
 		console.log(err);
+    throw err;
 	}	
 }
 
@@ -43,6 +44,7 @@ const updateContactMapping = async (itemID, updates) => {
     return updatedContactMapping;
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 
@@ -58,6 +60,7 @@ const deleteDatabse = async () => {
     );
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 
