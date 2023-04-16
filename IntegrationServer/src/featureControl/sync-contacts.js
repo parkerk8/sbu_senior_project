@@ -78,7 +78,7 @@ async function fetchContacts (req, res) {
  * @returns null.
  */
 async function initalSetupGoogleContacts (boardItems) { // makes new database.
-  boardItemIndex = 0
+  let boardItemIndex = 0
 
   await contactMappingService.deleteDatabse()
   console.log(boardItems.length)
@@ -89,10 +89,9 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
       await sleep(20000)
     }
 
-    const columnValuesIndex = 0
     const currentItem = boardItems[boardItemIndex]
     const name = currentItem.name
-    const arrName = name.split(' ', 2)
+    const nameArr = await nameSplit(name)
 
     const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables)
     await service.people.createContact({
@@ -100,8 +99,10 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
         names: [
           {
             displayName: name,
-            familyName: arrName[1],
-            givenName: arrName[0]
+            givenName: nameArr[0],
+            middleName: nameArr[1],
+            familyName: nameArr[2],
+
           }
         ],
         emailAddresses: arrEmails,
@@ -109,8 +110,9 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
         biographies: arrNotes
       }
     }, async (err, res) => {
-      if (err) console.error('The API returned an error: ' + err)
-      else {
+      if (err) {
+        console.error('The API returned an error: ' + err)
+      } else {
         await contactMappingService.createContactMapping({
           itemID,
           resourceName: res.data.resourceName,
@@ -129,7 +131,7 @@ async function initalSetupGoogleContacts (boardItems) { // makes new database.
  * @param boardItems - An array of objects that contain the data from the board.
  * @returns null.
  */
-async function syncWithExistingContacts (boardItems) { // updates existing database.
+async function syncWithExistingContacts (boardItems) { // updates new and existing database.
   console.log('I made it to syncExistingContatcs')
   let boardItemIndex = 0
 
@@ -138,8 +140,9 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
       await sleep(20000)
     }
 
-    const columnValuesIndex = 0; const currentItem = boardItems[boardItemIndex]; const name = currentItem.name
-    const arrName = name.split(' ', 2)
+    const currentItem = boardItems[boardItemIndex];
+    const name = currentItem.name
+    const nameArr = await nameSplit(name)
 
     const { arrEmails, arrPhoneNumber, arrNotes, itemID } = parseColumnValues(currentItem, configVariables)
     let itemMapping = await contactMappingService.getContactMapping(itemID)
@@ -150,8 +153,9 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
           names: [
             {
               displayName: name,
-              familyName: arrName[1],
-              givenName: arrName[0]
+              givenName: nameArr[0],
+              middleName: nameArr[1],
+              familyName: nameArr[2],
             }
           ],
           emailAddresses: arrEmails,
@@ -175,8 +179,7 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
       }, async (err, res) => {
         if (err) return console.error('The API returned an error: ' + err)
         else {
-          let update = await contactMappingService.updateContactMapping(itemID, { resourceName: res.data.resourceName, etag: res.data.etag })
-          let updatedMapping = itemMapping = await contactMappingService.getContactMapping(itemID)
+          let updatedMapping = await contactMappingService.getContactMapping(itemID)
 
           await service.people.updateContact({
             resourceName: updatedMapping.dataValues.resourceName,
@@ -186,8 +189,10 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
               etag: updatedMapping.dataValues.etag,
               names: [
                 {
-                  givenName: arrName[0],
-                  familyName: arrName[1]
+                  displayName: name,
+                  givenName: nameArr[0],
+                  middleName: nameArr[1],
+                  familyName: nameArr[2],
                 }
               ],
               emailAddresses: arrEmails,
@@ -209,6 +214,28 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
 }
 
 // FUNCTIONS GO HERE
+/*
+ * Slit the name into first/middle/last name segments
+ * expected: max of 3 names/2 spaces atm.
+*/
+async function nameSplit(name) {
+  let nameArr = await name.split(" ");
+
+  //If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
+  switch (nameArr.length == 2) {
+    case 1 :
+        nameArr[1]= "";
+        nameArr[2]= "";
+        break;
+    case 2 :
+        nameArr[2] = nameArr[1];
+        nameArr[1] = "";
+        break;
+    case 3 :
+      break;
+  }
+  return nameArr;
+}
 /**
  * Sets up config.json when config.json does not exist. Else it reads the values in config.json
  * @param boardItems - an array of objects that contain the information for each contact.
@@ -216,13 +243,11 @@ async function syncWithExistingContacts (boardItems) { // updates existing datab
  */
 async function initializeConfig (boardItems) {
   try {
-    const boardItemIndex = 0 // pointer for how far into the board to look; which item is being checked
-    // Index 0 is the 'headers' of the board - has the column names like "Mobile Phone", "Email - Primary", etc.
     let columnIdConfig = []
-    const currentItem = boardItems[boardItemIndex] // container for the current' columns IDs (see above)
+    const currentItem = boardItems[0] // container for the current' columns IDs (see above)
 
     if (!(fs.existsSync(conf))) {
-      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex)
+      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, 0) //assume: at least one item in board. otherwise button should not exist to trigger
       const config = {
         columnIds: columnIdConfig,
         settings: {
@@ -235,9 +260,9 @@ async function initializeConfig (boardItems) {
         console.log('config has been stored')
       })
     } else {
-      let config = await fs.readFileSync(conf)
+      let config = fs.readFileSync(conf)
       config = await JSON.parse(config)
-      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, boardItemIndex)
+      columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, 0)
       config.columnIds = columnIdConfig
       config.settings.createNewDatabase = false
 
