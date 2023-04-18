@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimiterUsingThirdParty = require('../middleware/rateLimiter.js');
 
-const makeContact = require('../featureControl/make-contact.js').makeNewContact;   
+const makeNewContact = require('../featureControl/make-contact.js').makeNewContact;   
 const updateContact = require('../featureControl/update-contact.js').updateContactInfo;
 const authenticationMiddleware = require('../middleware/auth-request').authRequestMiddleware;
 const {fetchContacts} = require('../featureControl/sync-contacts.js');
@@ -14,7 +14,7 @@ router.use(rateLimiterUsingThirdParty);
 
 router.post('/create', authenticationMiddleware, async (req, res) => {
   await mutex.runExclusive(async () => {
-    await makeContact(req, res);
+    await makeNewContact(req, res);
   });
 });
 

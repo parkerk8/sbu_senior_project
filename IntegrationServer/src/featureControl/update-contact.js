@@ -9,7 +9,9 @@ const contactMappingService = require('../services/database-services/contact-map
 
 const { configVariables } = require('../config/config-helper.js');
 
-const { updateContactService } = require('../services/google-services/update-service.js')
+const { updateContactService } = require('../services/google-services/update-service.js') //API handler for pushing information to existing contacts
+
+const { formatColumnValues, nameSplit } = require('../util/contact-parser.js') //Information parser
 
 /**
  * It takes the data from the webhook, formats it, and then sends it to the update function.
@@ -22,8 +24,6 @@ async function updateContactInfo(req, res) {
   const itemMap = inboundFieldValues.itemMapping;
   const changedColumnId = inboundFieldValues.columnId;
   const itemID = JSON.stringify(inboundFieldValues.itemId);
-
-	console.log(JSON.stringify(inboundFieldValues));
 
 	const {
     primaryEmailID,
@@ -48,8 +48,10 @@ async function updateContactInfo(req, res) {
 }
 
 
-/**
- * When called, will push information for the titles located in the env are for the specified item 
+////FUNCTIONS////
+
+/*
+ * When called, will push information for the titles located in the env with specified item information
  * @param itemID - specifies the item that has been changed
  * @param itemMap - contains the information to update object - req payload from monday.com
  * @param [callback] - what function to call in case of failure
@@ -58,89 +60,21 @@ async function updateContactInfo(req, res) {
 async function updateExisting (itemID, itemMap) { // updates existing database.
   console.log('I made it to updateExisting')
 
-  
+  //Get info
   const name = itemMap.name
   const nameArr = await nameSplit(name)
-  let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap, configVariables)
+  let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap)
 
-  await updateContactService(name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
+  //Request update
+  try{
+    await updateContactService(name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
+  } catch(error){
+    return error
+  }
 
   return 0
 }
 
-////FUNCTIONS////
-
-/*
- * Splits the contact into an array to seperate first, middle, last
- * If there is only a first the other values will be undifined which the api call can handle
- * THIS IS A RUDIMENTARY NAME SPLIT - THERE ARE BETTER WAYS OF DOING THIS.
- * @params name - string with the full name to be split.
- * @returns nameArr - array of the name post-split
- */
-async function nameSplit(name) {
-    let nameArr = await name.split(" ");
-
-  //If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
-  switch (nameArr.length == 2) {
-    case 1 :
-        nameArr[1]= "";
-        nameArr[2]= "";
-        break;
-    case 2 :
-        nameArr[2] = nameArr[1];
-        nameArr[1] = "";
-        break;
-    case 3 :
-      break;
-  }
-  return nameArr;
-}
-
-async function phoneFormat(phone) {
-	//Try to format mobile and work phones 
-	if(phone != undefined) {
-		if(phone.length == 10) {
-			phone = await '1 ('+ phone.slice(0,3) + ') ' +  phone.substring(3,6) + '-' + phone.substring(6,10);
-		}
-	}
-  return phone;
-}
-
-async function formatColumnValues (itemMap) {
-  const {
-    primaryEmailID,
-    secondaryEmailID,
-    workPhoneID,
-    mobilePhoneID,
-    notesID,
-  } = configVariables;
-  let workPhone = await phoneFormat(itemMap[workPhoneID]);
-  let mobilePhone = await phoneFormat(itemMap[mobilePhoneID]);
-  const primaryEmail = itemMap[primaryEmailID];
-  const secondaryEmail = itemMap[secondaryEmailID];
-  const notes = itemMap[notesID];
-
-  let arrEmails= []
-  let arrPhoneNumbers=[]
-  let arrNotes = []
-
-  arrEmails.push({ value: primaryEmail, type: 'work', formattedType: 'Work' })
-  arrEmails.push({ value: secondaryEmail, type: 'other', formattedType: 'Other' })
-  arrPhoneNumbers.push({ value: workPhone, type: 'work', formattedType: 'Work' })
-  arrPhoneNumbers.push({ value: mobilePhone, type: 'mobile', formattedType: 'Mobile' })
-  arrNotes.push({ value: notes, contentType: 'TEXT_PLAIN' })
-
-  console.log("Emails: ", arrEmails)
-  console.log("Phones: ", arrPhoneNumbers)
-  console.log("Notes: ", arrNotes)
-
-  return {
-    arrEmails,
-    arrPhoneNumbers,
-    arrNotes,
-  }
-}
-
 module.exports = {
-	updateContactInfo,
+  updateContactInfo
 };
