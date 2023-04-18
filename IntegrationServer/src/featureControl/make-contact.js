@@ -8,6 +8,8 @@ const contactMappingService = require('../services/database-services/contact-map
 
 const { configVariables } = require('../config/config-helper.js');
 
+const { createContactService } = require('../services/google-services/create-service.js')
+
 
 async function makeNewContact(req, res) {
   try {
@@ -75,58 +77,15 @@ async function makeContact(itemID, itemMap) {
     notesID,
   } = configVariables;
   const name = itemMap.name;
-  const primaryEmail = itemMap[primaryEmailID];
-  const secondaryEmail = itemMap[secondaryEmailID];
-  const notes = itemMap[notesID];
   let nameArr = await nameSplit(name);
-  let workPhone = await phoneFormat(itemMap[workPhoneID]);
-  let mobilePhone = await phoneFormat(itemMap[mobilePhoneID]);
+  let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap, configVariables)
 
-
-  //calls the people api to create a contact with any information that has been put into the new contact. 
-  //Normally should just be the name
-  const res = await service.people.createContact({
-    requestBody: { //info to push to Google as new contact
-      names: [{
-          displayName: name,
-          givenName: nameArr[0],
-          middleName: nameArr[1],
-          familyName: nameArr[2],
-      }, ],
-      emailAddresses: [{
-          value: primaryEmail,
-          type: 'work',
-          formattedType: 'Work'
-        }, {
-          value: secondaryEmail,
-          type: 'other',
-          formattedType: 'Other'
-      }, ],
-      phoneNumbers: [{
-          value: workPhone,
-          type: 'work',
-          formattedType: 'Work'
-        }, {
-          value: mobilePhone,
-          type: 'mobile',
-          formattedType: 'Mobile'
-      }, ],
-      biographies: [{
-            value: notes,
-            contentType: 'TEXT_PLAIN'
-        } ],
-    } //end request body
-  }, async (err, res) => {
-    if (err) {
-      return console.error('The API returned an error: ' + err)
-    }
-    //Create internal contact mapping for database
-    await contactMappingService.createContactMapping({
-      itemID,
-      resourceName: res.data.resourceName, 
-      etag: res.data.etag
-    });
-  });
+  console.log("Emails: ", arrEmails)
+  console.log("Phones: ", arrPhoneNumbers)
+  console.log("Notes: ", arrNotes)
+  
+  await createContactService (name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
+  
   return 0;
 }
 
@@ -146,3 +105,38 @@ async function newMapping(itemID, resourceName, etag) {
 module.exports = {
   makeNewContact
 };
+
+async function formatColumnValues (itemMap) {
+  const {
+    primaryEmailID,
+    secondaryEmailID,
+    workPhoneID,
+    mobilePhoneID,
+    notesID,
+  } = configVariables;
+  let workPhone = await phoneFormat(itemMap[workPhoneID]);
+  let mobilePhone = await phoneFormat(itemMap[mobilePhoneID]);
+  const primaryEmail = itemMap[primaryEmailID];
+  const secondaryEmail = itemMap[secondaryEmailID];
+  const notes = itemMap[notesID];
+
+  let arrEmails= []
+  let arrPhoneNumbers=[]
+  let arrNotes = []
+
+  arrEmails.push({ value: primaryEmail, type: 'work', formattedType: 'Work' })
+  arrEmails.push({ value: secondaryEmail, type: 'other', formattedType: 'Other' })
+  arrPhoneNumbers.push({ value: workPhone, type: 'work', formattedType: 'Work' })
+  arrPhoneNumbers.push({ value: mobilePhone, type: 'mobile', formattedType: 'Mobile' })
+  arrNotes.push({ value: notes, contentType: 'TEXT_PLAIN' })
+
+  console.log("Emails: ", arrEmails)
+  console.log("Phones: ", arrPhoneNumbers)
+  console.log("Notes: ", arrNotes)
+
+  return {
+    arrEmails,
+    arrPhoneNumbers,
+    arrNotes,
+  }
+}
