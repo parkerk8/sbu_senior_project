@@ -9,6 +9,8 @@ const contactMappingService = require('../services/database-services/contact-map
 
 const { configVariables } = require('../config/config-helper.js');
 
+const { updateContactService } = require('../services/google-services/update-service.js')
+
 /**
  * It takes the data from the webhook, formats it, and then sends it to the update function.
  * @param req - The request object
@@ -56,54 +58,14 @@ async function updateContactInfo(req, res) {
 async function updateExisting (itemID, itemMap) { // updates existing database.
   console.log('I made it to updateExisting')
 
+  
   const name = itemMap.name
   const nameArr = await nameSplit(name)
   let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap, configVariables)
-  let itemMapping = await contactMappingService.getContactMapping(itemID)
 
-  console.log("Emails: ", arrEmails)
-  console.log("Phones: ", arrPhoneNumbers)
-  console.log("Notes: ", arrNotes)
+  await updateContactService(name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
 
-  service.people.get({
-    resourceName: itemMapping.dataValues.resourceName,
-    personFields: 'metadata'
-  }, async (err, res) => {
-    if (err) return console.error('The API returned an error at update1: ' + err)
-    else {
-      let updatedMapping = await contactMappingService.getContactMapping(itemID)
-      console.log("outer service")
-
-      //THIS IS BROKEN ATM - PUSH WIPES ALL INFORMATION INSTEAD; SEE sync-contacts.js
-      //FOR THE UPDATE CASE IN FUNCTION updateExistingContact FOR COMPARISON
-      await service.people.updateContact({
-        resourceName: updatedMapping.dataValues.resourceName,
-        sources: 'READ_SOURCE_TYPE_CONTACT',
-        updatePersonFields: 'biographies,emailAddresses,names,phoneNumbers',
-        requestBody: {
-          etag: updatedMapping.dataValues.etag,
-          names: [
-            {
-              displayName: name,
-              givenName: nameArr[0],
-              middleName: nameArr[1],
-              familyName: nameArr[2],
-            }
-          ],
-          emailAddresses: arrEmails,
-          phoneNumbers: arrPhoneNumbers,
-          biographies: arrNotes
-        }
-      }, async (err, res) => {
-        if (err) console.error('The API returned an error at update2: ' + err)
-        else {
-          console.log("inner update service")
-          await contactMappingService.updateContactMapping(itemID, { resourceName: res.data.resourceName, etag: res.data.etag })
-        }
-      })//end inner service
-    }
-  }) //end outer service
-  return null
+  return 0
 }
 
 ////FUNCTIONS////
