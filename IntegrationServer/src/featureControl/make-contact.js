@@ -58,11 +58,11 @@ async function nameSplit(name) {
 async function phoneFormat(phone) {
 	//Try to format mobile and work phones 
 	if(phone != undefined) {
-		console.log(phone);
 		if(phone.length == 10) {
 			phone = await '1 ('+ phone.slice(0,3) + ') ' +  phone.substring(3,6) + '-' + phone.substring(6,10);
 		}
 	}
+  return phone;
 }
 
 async function makeContact(itemID, itemMap) {
@@ -89,9 +89,9 @@ async function makeContact(itemID, itemMap) {
     requestBody: { //info to push to Google as new contact
       names: [{
           displayName: name,
-          familyName: nameArr[2],
           givenName: nameArr[0],
           middleName: nameArr[1],
+          familyName: nameArr[2],
       }, ],
       emailAddresses: [{
           value: primaryEmail,
