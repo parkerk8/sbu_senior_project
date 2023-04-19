@@ -54,10 +54,6 @@ async function formatColumnValues (itemMap) {
   arrPhoneNumbers.push({ value: mobilePhone, type: 'mobile', formattedType: 'Mobile' })
   arrNotes.push({ value: notes, contentType: 'TEXT_PLAIN' })
 
-  console.log("Emails: ", arrEmails)
-  console.log("Phones: ", arrPhoneNumbers)
-  console.log("Notes: ", arrNotes)
-
   return {
     arrEmails,
     arrPhoneNumbers,
@@ -65,7 +61,56 @@ async function formatColumnValues (itemMap) {
   }
 }
 
+async function parseColumnValues(currentItem) { 
+  const {
+    primaryEmailID,
+    secondaryEmailID,
+    workPhoneID,
+    mobilePhoneID,
+    notesID,
+  } = configVariables;
+
+  const arrEmails = []
+  const arrPhoneNumbers=[]
+  const arrNotes = []
+  let itemID = null
+
+  for (const currentColumn of currentItem.column_values) {
+    const columnId = currentColumn.id
+
+    switch (columnId) {
+      case primaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'work', formattedType: 'Work' })
+        break
+      case secondaryEmailID:
+        arrEmails.push({ value: currentColumn.text, type: 'other', formattedType: 'Other' })
+        break
+      case workPhoneID:
+        arrPhoneNumbers.push({ value: await phoneFormat(currentColumn.text), type: 'work', formattedType: 'Work' })
+        break
+      case mobilePhoneID:
+        arrPhoneNumbers.push({ value: await phoneFormat(currentColumn.text), type: 'mobile', formattedType: 'Mobile' })
+        break
+      case notesID:
+        arrNotes.push({ value: currentColumn.text, contentType: 'TEXT_PLAIN' })
+        break
+      case 'item_id':
+        itemID = currentColumn.text
+        break
+    }
+  }
+
+return { 
+    arrEmails,
+    arrPhoneNumbers,
+    arrNotes,
+    itemID
+  }
+}
+
+
 module.exports = {
   formatColumnValues,
+  parseColumnValues,
   nameSplit
 }
