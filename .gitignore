@@ -1,6 +1,3 @@
-/Trevor/node_modules
-/Trevor/package-lock.json
-/Trevor/.env
 /IntegrationServer/node_modules
 /IntegrationServer/package-lock.json
 /IntegrationServer/.env
@@ -9,3 +6,9 @@
 /TestGmailServer/TestGmailServer/package-lock.json
 /IntegrationServer/database.sqlite3
 /IntegrationServer/config.json
+/node_modules
+/.replit
+/.replit.nix
+/.upm
+/package-lock.json
+/package.json
