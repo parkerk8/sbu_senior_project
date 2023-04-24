@@ -1,12 +1,17 @@
-const {google} = require('googleapis');
-const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient
+const { google } = require('googleapis');
+const OAuth2Client = require('../OAuth/google-auth.js').OAuthClient;
+
 google.options({auth: OAuth2Client});
 
 const service = google.people({version: 'v1', auth: OAuth2Client});
 
 const contactMappingService = require('../services/database-services/contact-mapping-service');
 
-let {configVariables} = require('../config/config-helper.js');
+const { configVariables } = require('../config/config-helper.js');
+
+const { updateContactService } = require('../services/google-services/update-service.js') //API handler for pushing information to existing contacts
+
+const { formatColumnValues, nameSplit } = require('../util/contact-parser.js') //Information parser
 
 /**
  * It takes the data from the webhook, formats it, and then sends it to the update function.
@@ -14,159 +19,62 @@ let {configVariables} = require('../config/config-helper.js');
  * @param res - the response object
  * @returns a promise.
  */
-async function updateContactInfo(req, res){
+async function updateContactInfo(req, res) {
+	const { inboundFieldValues } = req.body.payload;
+  const itemMap = inboundFieldValues.itemMapping;
+  const changedColumnId = inboundFieldValues.columnId;
+  const itemID = JSON.stringify(inboundFieldValues.itemId);
 
-	let itemMap = req.body.payload.inboundFieldValues.itemMapping
-	let changedColumnId = req.body.payload.inboundFieldValues.columnId
-	let itemID = JSON.stringify(req.body.payload.inboundFieldValues.itemId);
+	const {
+    primaryEmailID,
+    secondaryEmailID,
+    workPhoneID,
+    mobilePhoneID,
+    notesID,
+  } = configVariables;
 
-	console.log(JSON.stringify(req.body.payload.inboundFieldValues));
-
-	if(changedColumnId == configVariables.primaryEmailID || changedColumnId == configVariables.secondaryEmailID || changedColumnId == configVariables.workPhoneId || changedColumnId == configVariables.mobilePhoneID || changedColumnId == configVariables.notesID)
-	{
-		let name = itemMap.name
-		let primaryEmail = itemMap[configVariables.primaryEmailID];
-		let secondaryEmail = itemMap[configVariables.secondaryEmailID];
-		let workPhone = itemMap[configVariables.workPhoneId];
-		let mobilePhone = itemMap[configVariables.mobilePhoneID];
-		let notes = itemMap[configVariables.notesID];
-	
-		//Splits the contact into an array to seperate first, middle, last
-		//If there is only a first the other values will be undifined which the api call can handle
-		const nameArr = await name.split(" ");
-		//If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
-		if (nameArr.length == 2) {
-			nameArr[2] = nameArr[1];
-			nameArr[1] = "";
+  if ([primaryEmailID, secondaryEmailID, workPhoneID, mobilePhoneID, notesID].includes(changedColumnId)) {
+		try { //Try triggering an update with payload information
+			await updateExisting(itemID, itemMap, updateExisting);
+      return res.status(200).send({})
+		} catch(err) { //Error
+			console.log("Catch block1 err: " + err);
 		}
-	
-	
-		//Try to format moble and work phones 
-		if(workPhone != undefined)
-		{
-			console.log(workPhone);
-			if(workPhone.length == 10) 
-			{
-				workPhone = await '1 ('+ workPhone.slice(0,3) + ') ' +  workPhone.substring(3,6) + '-' + workPhone.substring(6,10);
-			}
-		}
-		if(mobilePhone != undefined)
-		{
-			console.log(mobilePhone);
-			if(mobilePhone.length == 10) 
-			{
-				mobilePhone = await '1 ('+ mobilePhone.slice(0,3) + ') ' +  mobilePhone.substring(3,6) + '-' + mobilePhone.substring(6,10);
-			}
-		}
-	
-
-		/*
-		formatting for organizations feild in contacts, not currrently used. May be changed latter, leaving this here so we don't have to re-find-out how to format this
-
-		organizations: [
-						{
-							name: updateContact.Company,
-							title: updateContact.Role,
-						}
-					]
-		*/
-	
-		try{
-			let {resourceName, etag} = await contactMappingService.getContactMapping(itemID);
-			let help = await update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, update);
-		}
-		catch(err) {
-			console.log("Catch block err: " + err);
-		}
-		return res.status(200).send({});
-	} else {
-		console.log("no change");
+		return res.status(409).send({});
+	} else { //Column not a synced title
+		console.log("no change on update");
 		return res.status(200).send({});
 	}
 }
 
 
-/**
- * Takes in a bunch of parameters, and then it calls the Google People API to update a contact.
- * @param resourceName - The resource name of the contact to update.
- * @param etag - The etag of the contact.
- * @param itemID - The ID of the contact in the database
- * @param nameArr - an array of strings, where the first element is the first name, the second element
- * is the middle name, and the third element is the last name.
- * @param primaryEmail - the primary email address of the contact
- * @param secondaryEmail - "test@test.com"
- * @param workPhone - +1-555-555-5555
- * @param mobilePhone - +1-555-555-5555
- * @param notes - a string
- * @param [callback] - a function that will be called if the update fails.
+////FUNCTIONS////
+
+/*
+ * When called, will push information for the titles located in the env with specified item information
+ * @param itemID - specifies the item that has been changed
+ * @param itemMap - contains the information to update object - req payload from monday.com
+ * @param [callback] - what function to call in case of failure
+ *        // TODO: CHECK callback param: is this something to replace with a const variable due to possible security concerns?
  */
-async function update(resourceName, etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes, callback = undefined){
-	await service.people.updateContact({
-				resourceName: resourceName,
-				sources: 'READ_SOURCE_TYPE_CONTACT',
-				updatePersonFields: 'biographies,emailAddresses,names,phoneNumbers',
-				requestBody: {
-					etag: etag,	
-					names: [
-						{
-							givenName: nameArr[0],
-							middleName: nameArr[1],
-							familyName: nameArr[2],
-						},
-					],
-					emailAddresses: [
-						{
-							value: primaryEmail,
-							type: 'work',
-							formattedType: 'Work'
-						},
-						{
-							value: secondaryEmail,
-							type: 'other',
-							formattedType: 'Other'
-						},
-					],
-					phoneNumbers: [
-						{
-							value: workPhone,
-							type: 'work',
-							formattedType: 'Work'
-						},	
-						{
-							value: mobilePhone,
-							type: 'mobile',
-							formattedType: 'Mobile'
-						},
-					],
-					biographies: [
-						{
-							value: notes,
-							contentType: 'TEXT_PLAIN'
-						}
-					],
-				} 
-			}, async (err, res) => { 
-				if (err)
-				{
-					console.log('The API returned an error: ' + err);
-					service.people.get({
-						resourceName: resourceName,
-						personFields: 'metadata',
-					}, (err, res) => { 
-						if (err) return console.error('The API returned an error: ' + err);
-						if(callback) callback(res.data.resourceName, res.data.etag, itemID, nameArr, primaryEmail, secondaryEmail, workPhone, mobilePhone, notes);
-					});
-				}
-				else
-				{
-					await contactMappingService.updateContactMapping(itemID,{resourceName: res.data.resourceName, etag: res.data.etag});
-				}
-			} 
-		);
+async function updateExisting (itemID, itemMap) { // updates existing database.
+  console.log('I made it to updateExisting')
+
+  //Get info
+  const name = itemMap.name
+  const nameArr = await nameSplit(name)
+  let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap)
+
+  //Request update
+  try{
+    await updateContactService(name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
+  } catch(error){
+    return error
+  }
+
+  return 0
 }
 
-
-
 module.exports = {
-	updateContactInfo,
+  updateContactInfo
 };

@@ -8,6 +8,10 @@ const contactMappingService = require('../services/database-services/contact-map
 
 const { configVariables } = require('../config/config-helper.js');
 
+const { createContactService } = require('../services/google-services/create-service.js') //API handler for creating and updating contacts
+
+const { formatColumnValues, nameSplit } = require('../util/contact-parser.js') //Information parser
+
 
 async function makeNewContact(req, res) {
   try {
@@ -33,115 +37,31 @@ async function makeNewContact(req, res) {
   }
 };
 
-
 ////FUNCTIONS////
-//Rudimentary splitter for names using spaces - missing case for more than 3 spaces.
-async function nameSplit(name) {
-  let nameArr = await name.split(" ");
-
-  //If there is no middle, the last name needs to be assigned to nameArr[2] for the api call
-  switch (nameArr.length == 2) {
-    case 1 :
-        nameArr[1]= "";
-        nameArr[2]= "";
-        break;
-    case 2 :
-        nameArr[2] = nameArr[1];
-        nameArr[1] = "";
-        break;
-    case 3 :
-      break;
-  }
-  return nameArr;
-}
-
-async function phoneFormat(phone) {
-	//Try to format mobile and work phones 
-	if(phone != undefined) {
-		console.log(phone);
-		if(phone.length == 10) {
-			phone = await '1 ('+ phone.slice(0,3) + ') ' +  phone.substring(3,6) + '-' + phone.substring(6,10);
-		}
-	}
-}
-
-async function makeContact(itemID, itemMap) {
-  // Get name and the IDs of the Title Fields that exist from contactMappingService
-  const {
-    primaryEmailID,
-    secondaryEmailID,
-    workPhoneID,
-    mobilePhoneID,
-    notesID,
-  } = configVariables;
-  const name = itemMap.name;
-  const primaryEmail = itemMap[primaryEmailID];
-  const secondaryEmail = itemMap[secondaryEmailID];
-  const notes = itemMap[notesID];
-  let nameArr = await nameSplit(name);
-  let workPhone = await phoneFormat(itemMap[workPhoneID]);
-  let mobilePhone = await phoneFormat(itemMap[mobilePhoneID]);
-
-
-  //calls the people api to create a contact with any information that has been put into the new contact. 
-  //Normally should just be the name
-  const res = await service.people.createContact({
-    requestBody: { //info to push to Google as new contact
-      names: [{
-          displayName: name,
-          familyName: nameArr[2],
-          givenName: nameArr[0],
-          middleName: nameArr[1],
-      }, ],
-      emailAddresses: [{
-          value: primaryEmail,
-          type: 'work',
-          formattedType: 'Work'
-        }, {
-          value: secondaryEmail,
-          type: 'other',
-          formattedType: 'Other'
-      }, ],
-      phoneNumbers: [{
-          value: workPhone,
-          type: 'work',
-          formattedType: 'Work'
-        }, {
-          value: mobilePhone,
-          type: 'mobile',
-          formattedType: 'Mobile'
-      }, ],
-      biographies: [{
-            value: notes,
-            contentType: 'TEXT_PLAIN'
-        } ],
-    } //end request body
-  }, async (err, res) => {
-    if (err) {
-      return console.error('The API returned an error: ' + err)
-    }
-    //Create internal contact mapping for database
-    await contactMappingService.createContactMapping({
-      itemID,
-      resourceName: res.data.resourceName, 
-      etag: res.data.etag
-    });
-  });
-  return 0;
-}
 
 /*
-//WIP - No implemented.
-//Intended for in case functionality with createMappingService is split from the createContact case for readability reasons.
-async function newMapping(itemID, resourceName, etag) {
-  await contactMappingService.createContactMapping({
-    itemID,
-    resourceName: resourceName, 
-    etag: etag
-  });
-}
-*/
+ * When called, will push information for the titles located in the env with specified item information
+ * @param itemID - specifies the item that has been changed
+ * @param itemMap - contains the information to update object - req payload from monday.com
+ * @param [callback] - what function to call in case of failure
+ *        // TODO: CHECK callback param: is this something to replace with a const variable due to possible security concerns?
+ */
+async function makeContact(itemID, itemMap) {
 
+  //Get info
+  const name = itemMap.name;
+  let nameArr = await nameSplit(name);
+  let { arrEmails, arrPhoneNumbers, arrNotes } = await formatColumnValues(itemMap, configVariables)
+
+  //Request Creation
+  try {
+    await createContactService (name, nameArr, arrEmails, arrPhoneNumbers, arrNotes, itemID)
+  } catch(error) {
+    return error
+  }
+  
+  return 0;
+}
 
 module.exports = {
   makeNewContact
