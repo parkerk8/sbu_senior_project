@@ -5,6 +5,9 @@ const fs = require('fs')
 const { configVariables } = require('../config/config-helper.js') // List of IDs for the various titles being looked at on Monday.com
 const setConfigVariables = require('../config/config-helper.js').setConfigVariables
 
+/*Database controller  */
+const { deleteDatabse } = require('../services/database-services/contact-mapping-service');
+
 /**
  * Sets up config.json when config.json does not exist. Else it reads the values in config.json
  * @param boardItems - an array of objects that contain the information for each contact.
@@ -17,6 +20,9 @@ async function initializeConfig (boardItems) {
 
     if (!(fs.existsSync(conf))) {
       columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, 0) //assume: at least one item in board. otherwise button should not exist to trigger
+
+      deleteDatabse(); //No config - reset database
+
       const config = {
         columnIds: columnIdConfig,
         settings: {
@@ -29,6 +35,7 @@ async function initializeConfig (boardItems) {
         console.log('config has been stored')
       })
     } else {
+
       let config = fs.readFileSync(conf)
       config = await JSON.parse(config)
       columnIdConfig = getColumnIdConfig(currentItem, columnIdConfig, 0)
